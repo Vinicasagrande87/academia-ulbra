@@ -18,5 +18,9 @@ async index(req, res){
 
         return res.status (500).json ({error: 'erro ao listar alunos'})
         }
-    }
     },
+
+      async create(req,res){
+        
+      } 
+    }

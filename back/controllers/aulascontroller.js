@@ -71,7 +71,7 @@ module.exports={
        }
     },
 
-      async index (req, res){
+async index (req, res){
         try{
         // se tudo der certo
           const tipoUsuario = req.userType;
@@ -80,44 +80,77 @@ module.exports={
          //pegando o id do usuario que esta fazendo a requisição
           let aulas;
           // criando uma variavel para guardar o resultado da busca
-          if(tipoUsuario=== 'professor')
+
+          if(tipoUsuario === 'professor'){
           // condicional se usuario for igual a professor ele tera acesso
-          const {aluno_id} = req.query
-          // aqui estamos desestruturando a tabela aluno e pegando somente a informação do id dele
 
-          aulas = await connection ('aulas')
-          // aqui estou atribuindo a variavel aulas o caminho até a tabela aulas 
+            const {aluno_id} = req.query
+            // aqui estamos desestruturando a query e pegando somente a informação do id do aluno
 
-          .join('alunos', 'alunos.aulas_id', '=' , 'aulas.id')
-          // aqui estou juntando as tabelas alunos e a tabelas aulas e buscando quais aulas esse aluno tem 
-          select(
-          // selecionar as seguintes colunas para dar a resposta 
-            'alunos.id as alunos_id',
-            'alunos.nome as alunos_nome',
-            'aulas.id as aulas_id',
-            'aulas.nome as aulas_nome',
-            'aulas.equipamentos',
-            'aulas.carga'
-          )
-          .where('alunos.id', alunos_id)
-          // é a requisição do professor, onde ele diz qual aluno ele quer saber as informações que o select esta pedindo
+            aulas = await connection ('aulas')
+            // aqui estou atribuindo a variavel aulas o caminho até a tabela aulas 
+
+            .join('alunos', 'alunos.aulas_id', '=' , 'aulas.id')
+            // aqui estou juntando as tabelas alunos e a tabelas aulas e buscando quais aulas esse aluno tem 
+
+            .select(
+            // selecionar as seguintes colunas para dar a resposta 
+              'alunos.id as alunos_id',
+              'alunos.nome as alunos_nome',
+              'aulas.id as aulas_id',
+              'aulas.nome as aulas_nome',
+              'aulas.equipamentos',
+              'aulas.carga'
+            )
+            .where('alunos.id', aluno_id)
+            // é a requisição do professor, onde ele diz qual aluno ele quer saber as informações que o select esta pedindo
+
+          } else {
+          // se não for professor, é o próprio aluno vendo suas aulas
+
+            aulas = await connection('aulas')
+            .join('alunos', 'alunos.aulas_id', '=', 'aulas.id')
+            .select(
+              'aulas.id as aulas_id',
+              'aulas.nome as aulas_nome',
+              'aulas.equipamentos',
+              'aulas.carga'
+            )
+            .where('alunos.id', id)
+            // busca somente as aulas do próprio aluno logado
+          }
+
+          return res.json(aulas);
+          // retornando o resultado da busca pro cliente
 
         }catch(error){
          return res.status(500).json({error:'Erro ao buscar'});
         }
       },
+
       async delete (req, res){
       try {
-        if(tipoUsuario==='professor'){
-        await connection ('aulas');
-        this.delete();
-      
-        return status(201).json({mensagem:'Aula deletada com sucesso'});
-        }catch(error){
+        const tipoUsuario = req.userType;
+        // me certificando que o usuario que quer deletar seja o professor
+
+        if(tipoUsuario === 'professor'){
+
+          const { id } = req.params;
+          // pegando o ID da aula que vem lá na URL da requisição
+
+          await connection('aulas')
+            .where('id', id)
+            .del();
+          // vai até a tabela aulas, filtra pelo ID específico da aula e deleta do banco
+
+          return res.status(200).json({mensagem:'Aula deletada com sucesso'});
+
+        } else {
+          return res.status(403).json({ error: 'Acesso negado. Apenas professores podem deletar aulas.' });
+        }
+
+        } catch(error){
           return res.status(500).json({error:'Error ao deletar'})
         }
       }
-    }
 };
-      
-    
