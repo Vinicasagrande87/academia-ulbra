@@ -1,24 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="ion-padding">
-  <div class="login-container" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
-    
-    <div style="text-align: center; margin-bottom: 30px;">
-      <h1 style="font-weight: bold; color: var(--ion-color-primary);">Academia Ulbra</h1>
-      <p style="color: gray;">Faça login para acessar o sistema</p>
+  <div class="login-container">
+    <div class="ion-text-center ion-margin-bottom">
+      <h1 class="ion-color-primary">Academia Ulbra</h1>
+      <p>Faça login para acessar o sistema</p>
     </div>
 
-    <ion-list lines="none">
-      <ion-item style="margin-bottom: 15px; --background: #f4f5f8; border-radius: 8px;">
-        <ion-input label="E-mail" labelPlacement="stacked" type="email" [(ngModel)]="email" placeholder="seu@email.com"></ion-input>
+    <form (ngSubmit)="fazerLogin()">
+      <ion-item>
+        <ion-input 
+          label="E-mail" 
+          labelPlacement="stacked" 
+          type="email" 
+          [(ngModel)]="credentials.email" 
+          name="email" 
+          required 
+          placeholder="seu@email.com">
+        </ion-input>
       </ion-item>
 
-      <ion-item style="margin-bottom: 20px; --background: #f4f5f8; border-radius: 8px;">
-        <ion-input label="Senha" labelPlacement="stacked" type="password" [(ngModel)]="senha" placeholder="Sua senha"></ion-input>
+      <ion-item>
+        <ion-input 
+          label="Senha" 
+          labelPlacement="stacked" 
+          type="password" 
+          [(ngModel)]="credentials.senha" 
+          name="senha" 
+          required 
+          placeholder="Sua senha">
+        </ion-input>
       </ion-item>
-    </ion-list>
 
-    <ion-button expand="block" shape="round" (click)="fazerLogin()" style="height: 48px; font-weight: bold;">
-      Entrar
-    </ion-button>
-
+      <ion-button expand="block" type="submit" class="ion-margin-top">
+        ENTRAR
+      </ion-button>
+    </form>
   </div>
 </ion-content>

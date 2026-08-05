@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Área do Aluno</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()" color="light">
+        <ion-icon name="log-out-outline" style="margin-right: 5px;"></ion-icon>
+        Sair
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="welcome-banner">
+    <h2>Olá, Aluno(a)!</h2>
+    <p>Acompanhe seus treinos, histórico e sua situação financeira.</p>
+  </div>
+
+  <ion-grid>
+    <ion-row>
+      <!-- Meus Treinos -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/aluno-treinos" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="barbell-outline" size="large" color="primary"></ion-icon>
+            <ion-card-title>Meus Treinos</ion-card-title>
+            <p>Visualizar suas fichas de treino atuais</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Biblioteca de Exercícios -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/aluno-exercicios" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="fitness-outline" size="large" color="tertiary"></ion-icon>
+            <ion-card-title>Biblioteca de Exercícios</ion-card-title>
+            <p>Consultar lista de exercícios e vídeos explicativos</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Histórico de Treinos -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/aluno-historico" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="time-outline" size="large" color="secondary"></ion-icon>
+            <ion-card-title>Histórico de Treinos</ion-card-title>
+            <p>Ver evoluções e fichas anteriores</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Planos e Pagamentos -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/aluno-financeiro" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="card-outline" size="large" color="success"></ion-icon>
+            <ion-card-title>Planos e Pagamentos</ion-card-title>
+            <p>Consultar status da mensalidade e plano ativo</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Meu Perfil -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/aluno-perfil" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="person-outline" size="large" color="warning"></ion-icon>
+            <ion-card-title>Meu Perfil</ion-card-title>
+            <p>Atualizar dados cadastrais e senha</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

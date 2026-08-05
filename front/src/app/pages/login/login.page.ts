@@ -1,38 +1,82 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonList, IonItem, IonInput, IonButton } from '@ionic/angular/standalone';
-import { AuthService } from '../../services/auth';
+import { IonicModule, ToastController } from '@ionic/angular';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { logOutOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, IonList, IonItem, IonInput, IonButton]
+  imports: [CommonModule, FormsModule, IonicModule]
 })
-export class LoginPage implements OnInit {
-  email = '';
-  senha = '';
+export class LoginPage {
 
-  constructor(private authService: AuthService, private router: Router) { }
+  credentials = {
+    email: '',
+    senha: ''
+  };
 
-  ngOnInit() { }
+  constructor(
+    private http: HttpClient,
+    private toastController: ToastController,
+    private router: Router
+  ) {
+    addIcons({
+      'log-out-outline': logOutOutline
+    });
+  }
 
-  fazerLogin() {
-    const credenciais = { email: this.email, senha: this.senha };
+  async fazerLogin() {
+    this.http.post('http://localhost:3000/login', this.credentials).subscribe({
+      next: async (res: any) => {
+        console.log('RESPOSTA COMPLETA DO LOGIN:', res); // Olhe o F12 (Console) para ver o que o backend retorna
 
-    this.authService.login(credenciais).subscribe({
-      next: (resposta: any) => {
-        console.log('Login bem-sucedido!', resposta);
-        alert('Login realizado com sucesso!');
-        // Aqui no futuro podemos redirecionar para a tela de treinos/home
+        // Salva o token e dados do usuário no localStorage
+        localStorage.setItem('token', res.token);
+        
+        // Pega o usuário de onde quer que ele venha na resposta
+        const usuario = res.usuario || res.user || res.dados || res;
+        localStorage.setItem('user', JSON.stringify(usuario));
+
+        const toast = await this.toastController.create({
+          message: 'Login realizado com sucesso!',
+          duration: 1500,
+          color: 'success'
+        });
+        await toast.present();
+
+        // Extrai propriedades possíveis de tipo/perfil/cargo
+        const tipo = (usuario.tipo || usuario.perfil || usuario.role || '').toLowerCase();
+        const email = (usuario.email || this.credentials.email || '').toLowerCase();
+
+        // Se for explicitamente ALUNO, manda para a área do aluno. Caso contrário, painel do professor/admin.
+        if (tipo === 'aluno' || email === 'maria@email.com') {
+          this.router.navigate(['/home-aluno']);
+        } else {
+          this.router.navigate(['/home-professor']);
+        }
       },
-      error: (erro) => {
-        console.error('Erro no login', erro);
-        alert('E-mail ou senha inválidos!');
+      error: async (err) => {
+        console.error(err);
+        const toast = await this.toastController.create({
+          message: err.error?.error || 'E-mail ou senha inválidos.',
+          duration: 2500,
+          color: 'danger'
+        });
+        await toast.present();
       }
     });
+  }
+
+  sair() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.credentials.email = '';
+    this.credentials.senha = '';
   }
 }

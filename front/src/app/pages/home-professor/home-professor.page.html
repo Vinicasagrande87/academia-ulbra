@@ -1,0 +1,88 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Painel do Professor / Admin</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()" color="light">
+        <ion-icon name="log-out-outline" style="margin-right: 5px;"></ion-icon>
+        SAIR
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="welcome-banner">
+    <h2>Bem-vindo, Gestor!</h2>
+    <p>Selecione abaixo a opção desejada para gerenciar a academia.</p>
+  </div>
+
+  <ion-grid>
+    <ion-row>
+      <!-- Cadastrar Aluno -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/aluno-cadastro" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="person-add-outline" size="large" color="primary"></ion-icon>
+            <ion-card-title>Cadastrar Aluno</ion-card-title>
+            <p>Registrar novos alunos no sistema</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Alunos Cadastrados -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/alunos-lista" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="people-outline" size="large" color="primary"></ion-icon>
+            <ion-card-title>Alunos Cadastrados</ion-card-title>
+            <p>Visualizar e gerenciar alunos</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Cadastrar Treino -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/treino-cadastro" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="barbell-outline" size="large" color="secondary"></ion-icon>
+            <ion-card-title>Cadastrar Treino</ion-card-title>
+            <p>Montar rotinas de treino para alunos</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Gerenciar Treinos (Editar/Deletar) -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/treinos-lista" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="create-outline" size="large" color="secondary"></ion-icon>
+            <ion-card-title>Gerenciar Treinos</ion-card-title>
+            <p>Editar ou remover treinos cadastrados</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Cadastrar Exercícios -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/exercicio-cadastro" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="fitness-outline" size="large" color="tertiary"></ion-icon>
+            <ion-card-title>Cadastrar Exercícios</ion-card-title>
+            <p>Adicionar exercícios e vídeos explicativos</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Planos e Pagamentos -->
+      <ion-col size="12" size-md="6">
+        <ion-card routerLink="/financeiro" class="menu-card">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="card-outline" size="large" color="success"></ion-icon>
+            <ion-card-title>Planos e Pagamentos</ion-card-title>
+            <p>Controle financeiro e mensalidades</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
