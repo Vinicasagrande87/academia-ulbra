@@ -22,4 +22,20 @@ export const routes: Routes = [
     path: 'home-aluno',
     loadComponent: () => import('./pages/home-aluno/home-aluno.page').then( m => m.HomeAlunoPage)
   },
+  {
+    path: 'alunos-lista',
+    loadComponent: () => import('./pages/alunos-lista/alunos-lista.page').then( m => m.AlunosListaPage)
+  },
+  {
+    path: 'aluno-ficha/:id',
+    loadComponent: () => import('./pages/aluno-ficha/aluno-ficha.page').then( m => m.AlunoFichaPage)
+  },
+  {
+    path: 'aluno-perfil',
+    loadComponent: () => import('./pages/aluno-perfil/aluno-perfil.page').then( m => m.AlunoPerfilPage)
+  },
+  {
+    path: 'treino-cadastro/:alunoId',
+    loadComponent: () => import('./pages/treino-cadastro/treino-cadastro.page').then( m => m.TreinoCadastroPage)
+  },
 ];

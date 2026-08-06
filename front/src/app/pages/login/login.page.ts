@@ -34,11 +34,9 @@ export class LoginPage {
   async fazerLogin() {
     this.http.post('http://localhost:3000/login', this.credentials).subscribe({
       next: async (res: any) => {
-        console.log('RESPOSTA COMPLETA DO LOGIN:', res); // Olhe o F12 (Console) para ver o que o backend retorna
-
         // Salva o token e dados do usuário no localStorage
         localStorage.setItem('token', res.token);
-        
+
         // Pega o usuário de onde quer que ele venha na resposta
         const usuario = res.usuario || res.user || res.dados || res;
         localStorage.setItem('user', JSON.stringify(usuario));
@@ -50,12 +48,11 @@ export class LoginPage {
         });
         await toast.present();
 
-        // Extrai propriedades possíveis de tipo/perfil/cargo
-        const tipo = (usuario.tipo || usuario.perfil || usuario.role || '').toLowerCase();
-        const email = (usuario.email || this.credentials.email || '').toLowerCase();
+        // O back-end sempre retorna o tipo do usuário (admin, professor ou aluno)
+        const tipo = (usuario.tipo || '').toLowerCase();
 
-        // Se for explicitamente ALUNO, manda para a área do aluno. Caso contrário, painel do professor/admin.
-        if (tipo === 'aluno' || email === 'maria@email.com') {
+        // Se for aluno, manda para a área do aluno. Caso contrário, painel do professor/admin.
+        if (tipo === 'aluno') {
           this.router.navigate(['/home-aluno']);
         } else {
           this.router.navigate(['/home-professor']);

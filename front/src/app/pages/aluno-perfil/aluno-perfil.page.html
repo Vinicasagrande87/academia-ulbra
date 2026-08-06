@@ -1,0 +1,95 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home-aluno"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Meu Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="salvarPerfil()">
+    <ion-item>
+      <ion-input
+        label="Nome completo"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="aluno.nome"
+        name="nome"
+        required
+        placeholder="Nome completo">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Peso (kg)"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="aluno.peso"
+        name="peso"
+        placeholder="Ex: 75,5">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Altura (m)"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="aluno.altura"
+        name="altura"
+        placeholder="Ex: 1,75">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="CPF"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="aluno.cpf"
+        name="cpf"
+        placeholder="000.000.000-00">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Telefone"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="aluno.telefone"
+        name="telefone"
+        placeholder="(00) 00000-0000">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="E-mail"
+        labelPlacement="stacked"
+        type="email"
+        [(ngModel)]="aluno.email"
+        name="email"
+        required
+        placeholder="seu@email.com">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Finalidade"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="aluno.finalidade"
+        name="finalidade"
+        placeholder="Ex: Hipertrofia, Emagrecimento">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top">
+      SALVAR ALTERAÇÕES
+    </ion-button>
+  </form>
+</ion-content>

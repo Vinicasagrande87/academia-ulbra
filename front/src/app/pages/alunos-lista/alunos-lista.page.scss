@@ -1,0 +1,12 @@
+ion-item {
+  --border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+ion-item h2 {
+  font-weight: bold;
+}
+
+ion-item p {
+  color: var(--ion-color-step-600, #666);
+}

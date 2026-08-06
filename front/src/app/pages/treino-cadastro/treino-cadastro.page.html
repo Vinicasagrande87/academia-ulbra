@@ -1,0 +1,93 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="'/aluno-ficha/' + alunoId"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Montar Treino</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="salvarTreino()">
+    <ion-item>
+      <ion-select
+        label="Dia da semana"
+        labelPlacement="stacked"
+        [(ngModel)]="diaSemana"
+        name="diaSemana"
+        required
+        placeholder="Selecione o dia">
+        <ion-select-option *ngFor="let dia of diasDaSemana" [value]="dia">{{ dia }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <h2 class="ion-margin-top">Exercícios do treino</h2>
+
+    <ion-card *ngFor="let item of itens; let i = index">
+      <ion-card-content>
+        
+        <!-- 1. Escolhe primeiro o Grupo Muscular -->
+        <ion-item>
+          <ion-select
+            label="Grupo Muscular"
+            labelPlacement="stacked"
+            [(ngModel)]="item.grupo"
+            [name]="'grupo_' + i"
+            required
+            placeholder="Selecione o grupo"
+            (ionChange)="item.exercicio_id = null">
+            <ion-select-option *ngFor="let grupo of gruposMusculares" [value]="grupo">{{ grupo }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- 2. Escolhe o Exercício filtrado pelo grupo selecionado -->
+        <ion-item>
+          <ion-select
+            label="Exercício"
+            labelPlacement="stacked"
+            [(ngModel)]="item.exercicio_id"
+            [name]="'exercicio_' + i"
+            [disabled]="!item.grupo"
+            required
+            placeholder="Selecione o exercício">
+            <ion-select-option *ngFor="let ex of exerciciosDoGrupo(item.grupo)" [value]="ex.id">{{ ex.nome }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Carga (kg)"
+            labelPlacement="stacked"
+            type="text"
+            [(ngModel)]="item.carga"
+            [name]="'carga_' + i"
+            placeholder="Ex: 40">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Repetições"
+            labelPlacement="stacked"
+            type="text"
+            [(ngModel)]="item.repeticoes"
+            [name]="'repeticoes_' + i"
+            placeholder="Ex: 3x12">
+          </ion-input>
+        </ion-item>
+
+        <ion-button fill="clear" color="danger" type="button" (click)="removerItem(i)" *ngIf="itens.length > 1">
+          Remover exercício
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button expand="block" fill="outline" type="button" (click)="adicionarItem()" class="ion-margin-top">
+      + Adicionar exercício
+    </ion-button>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top">
+      SALVAR TREINO
+    </ion-button>
+  </form>
+</ion-content>

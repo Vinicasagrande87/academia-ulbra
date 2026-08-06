@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home-professor"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Alunos Matriculados</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list *ngIf="alunos.length > 0; else semAlunos">
+    <ion-item *ngFor="let aluno of alunos" [routerLink]="['/aluno-ficha', aluno.id]" [state]="{ nome: aluno.nome }" button detail="true">
+      <ion-label>
+        <h2>{{ aluno.nome }}</h2>
+        <p>{{ aluno.email }}</p>
+        <p *ngIf="aluno.finalidade">{{ aluno.finalidade }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semAlunos>
+    <div class="ion-text-center ion-padding">
+      <p>Nenhum aluno cadastrado ainda.</p>
+    </div>
+  </ng-template>
+</ion-content>

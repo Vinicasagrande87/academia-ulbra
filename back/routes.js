@@ -20,8 +20,12 @@ routes.get('/', (req, res) => {
 routes.post('/login', loginController.create);
 
 // aluno
-routes.post('/alunos', alunoController.create);
-// cadastro é público, é assim que o aluno se cria antes de ter token
+routes.post('/alunos', authMiddleware, alunoController.create);
+// exige token: só admin/professor cadastram aluno (checagem dentro do controller)
+routes.get('/alunos', authMiddleware, alunoController.index);
+// lista todos os alunos, só admin/professor (checagem dentro do controller)
+routes.get('/alunos/perfil', authMiddleware, alunoController.perfil);
+// aluno vê os próprios dados cadastrais (tela "Meu Perfil")
 routes.get('/alunos/treino', authMiddleware, alunoController.treino);
 routes.put('/alunos', authMiddleware, alunoController.update);
 routes.delete('/alunos', authMiddleware, alunoController.delete);

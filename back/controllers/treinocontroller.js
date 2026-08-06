@@ -2,18 +2,15 @@ const connection = require('../database/connections');
 // crio uma variavel que fara conexão com o arquivo connections que esta na pasta database
 
 module.exports = {
-// informando que as funções a seguir estão disponiveis a outros arquivos
 
     async create (req, res){
     // função para o professor ou admin cadastrar um novo treino para o aluno
         try {
             const tipoUsuario = req.userType;
-            // pega o tipo do usuário logado (professor ou admin)
             const professor_id = req.userId;
-            // pega o id do professor logado através do token para satisfazer a restrição do banco
+            // pega o tipo e o id de quem está logado
 
             if (tipoUsuario !== 'admin' && tipoUsuario !== 'professor') {
-            // se não for admin nem professor, bloqueia a ação
                 return res.status(403).json({ error: 'Acesso negado. Apenas administradores e professores podem montar treinos.' });
             }
 
@@ -21,14 +18,14 @@ module.exports = {
             // desestruturando os dados enviados na requisição
 
             const [{ id }] = await connection('treinos').insert({
-            // insere o cabeçalho do treino na tabela treinos informando aluno, professor e dia
                 aluno_id,
                 professor_id,
                 dia_semana
             }).returning('id');
+            // no Postgres precisa do .returning('id') pra receber o ID de volta
 
-            // Se vierem exercícios no corpo da requisição, insere os itens do treino
             if (exercicios && exercicios.length > 0) {
+            // se vierem exercícios no corpo da requisição, insere os itens do treino
                 const itensParaInserir = exercicios.map(item => ({
                     treino_id: id,
                     exercicio_id: item.exercicio_id,
@@ -49,15 +46,48 @@ module.exports = {
     },
 
     async index (req, res){
-    // lista todos os treinos cadastrados
+    // lista os treinos: se vier aluno_id na query, filtra só os desse aluno
+    // (usado na ficha de treino clicada a partir da lista de alunos);
+    // sem aluno_id, lista os treinos de todos
         try {
-            const treinos = await connection('treinos').select('*');
+            const tipoUsuario = req.userType;
+
+            if (tipoUsuario !== 'admin' && tipoUsuario !== 'professor') {
+                return res.status(403).json({ error: 'Acesso negado. Apenas administradores e professores podem visualizar dessa forma.' });
+            }
+
+            const { aluno_id } = req.query;
+
+            let query = connection('treinos').select('id', 'aluno_id', 'professor_id', 'dia_semana');
+
+            if (aluno_id) {
+            // se veio um aluno específico na query, filtra só os treinos dele
+                query = query.where('aluno_id', aluno_id);
+            }
+
+            const treinos = await query;
+
+            for (const treino of treinos) {
+            // pra cada treino, busca os exercícios com carga, repetição e vídeo
+                treino.exercicios = await connection('treino_itens')
+                    .join('exercicios', 'exercicios.id', '=', 'treino_itens.exercicio_id')
+                    .select(
+                        'exercicios.nome as exercicio_nome',
+                        'exercicios.video_url',
+                        'exercicios.equipamento',
+                        'treino_itens.carga',
+                        'treino_itens.repeticoes',
+                        'treino_itens.ordem'
+                    )
+                    .where('treino_itens.treino_id', treino.id)
+                    .orderBy('treino_itens.ordem');
+            }
 
             return res.json(treinos);
 
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Erro ao listar treinos.' });
+            return res.status(500).json({ error: 'Erro ao buscar treinos.' });
         }
     },
 
@@ -71,16 +101,11 @@ module.exports = {
             }
 
             const { id } = req.params;
-            // pegando o ID do treino que vem na URL da requisição
-
             const { dia_semana } = req.body;
-            // pegando os novos dados
 
             await connection('treinos')
                 .where('id', id)
-                .update({
-                    dia_semana
-                });
+                .update({ dia_semana });
 
             return res.json({ message: 'Treino atualizado com sucesso!' });
 
@@ -101,10 +126,9 @@ module.exports = {
 
             const { id } = req.params;
 
-            // Deleta primeiro os itens vinculados para evitar erro de chave estrangeira
             await connection('treino_itens').where('treino_id', id).delete();
+            // apaga primeiro os itens, pra não ficar registro órfão no banco
 
-            // Depois deleta o treino principal
             await connection('treinos')
                 .where('id', id)
                 .delete();

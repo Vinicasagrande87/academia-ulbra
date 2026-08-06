@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 
 module.exports = {
 // informando que as funções a seguir estão disponiveis a outros arquivos
+
     async create (req, res){
     // função para o professor ou admin cadastrar um novo aluno
         try {
@@ -16,13 +17,14 @@ module.exports = {
             }
 
             const {nome, idade, peso, altura, cpf, telefone, email, senha, finalidade} = req.body;
-            // estou criando uma desestruturação com os atributos a serem preenchidos
+            // estou criando uma desestruturalçao com os atributos a serem preenchidos
 
             const senhaCriptografada = await bcrypt.hash(senha, 8);
             // criptografa a senha antes de guardar no banco, nunca salvamos ela pura
 
             const [{ id }] = await connection('alunos').insert({
-            // estou criando vetor e conectando as informações nele contidas nos atributos abaixo
+            // estou criando vetor e conectando as informações nele contidas nos atributos
+            // abaixo
                 nome,
                 idade,
                 peso,
@@ -44,6 +46,57 @@ module.exports = {
             return res.status(500).json({error: 'Erro ao cadastrar aluno'});
         }
     }, // Fechamento correto para separar as funções do objeto
+
+    async index (req, res){
+    // lista todos os alunos cadastrados, usado pelo professor/admin (tela de alunos matriculados)
+        try {
+            const tipoUsuario = req.userType;
+
+            if (tipoUsuario !== 'admin' && tipoUsuario !== 'professor') {
+                return res.status(403).json({ error: 'Acesso negado. Apenas administradores e professores podem listar alunos.' });
+            }
+
+            const alunos = await connection('alunos')
+                .select('id', 'nome', 'idade', 'peso', 'altura', 'cpf', 'telefone', 'email', 'finalidade');
+            // nunca selecionamos a coluna senha, por segurança
+
+            return res.json(alunos);
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao listar alunos.' });
+        }
+    },
+
+    async perfil (req, res){
+    // aluno vê os próprios dados cadastrais (tela "Meu Perfil")
+        try {
+            const tipoUsuario = req.userType;
+
+            if (tipoUsuario !== 'aluno') {
+            // só o próprio aluno acessa essa rota
+                return res.status(403).json({ error: 'Acesso negado. Apenas o próprio aluno pode ver esse perfil.' });
+            }
+
+            const id = req.userId;
+
+            const aluno = await connection('alunos')
+                .select('id', 'nome', 'idade', 'peso', 'altura', 'cpf', 'telefone', 'email', 'finalidade')
+                .where('id', id)
+                .first();
+            // nunca selecionamos a coluna senha, por segurança
+
+            if (!aluno) {
+                return res.status(404).json({ error: 'Aluno não encontrado.' });
+            }
+
+            return res.json(aluno);
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao buscar perfil do aluno.' });
+        }
+    },
 
     async treino (req, res){
     // aluno vê os treinos disponíveis pra ele (segunda a sexta, com exercício, carga,
@@ -97,18 +150,25 @@ module.exports = {
 },
 
     async update (req, res){
-    // estou criando uma função para caso o aluno queira editar seu cadastro
+    // edita o próprio cadastro, somente o aluno logado pode fazer isso
          try{
         // caso de tudo certo faça o codigo abaixo
 
+            const tipoUsuario = req.userType;
+
+            if (tipoUsuario !== 'aluno') {
+            // se não for aluno (professor ou admin tentando usar essa rota), bloqueia
+                return res.status(403).json({ error: 'Acesso negado. Apenas o próprio aluno pode editar seu cadastro.' });
+            }
+
             const id = req.userId
-            // faz com que a edição seja feita somente no usuario que esta logado
+            //faz com que a dição seja feita somente no usuario que esta logado
 
             const {nome, peso, altura, cpf, telefone, email, finalidade} = req.body;
             // pegando os novos dados enviados na requisição
 
             const alunos = await connection('alunos')
-            // guardando a conexão na variavel alunos ate a tabela alunos
+            //guardando a conexão na variavel alunos ate a tabela alunos
             .where('id', id)
                 // filtra para alterar apenas o aluno logado
                 .update({
@@ -131,7 +191,7 @@ module.exports = {
         },
 
         async delete(req, res){
-            // criando função assincrona para caso o aluno queira deletar seu cadastro
+            // craindo função assincrona para caso o aluno queira deletar seu cadastro
             try{
             // caso de tudo certo
             const id = req.userId;
@@ -153,4 +213,4 @@ module.exports = {
                 return res.status(500).json({ error: 'Erro ao deletar cadastro.' });
             }
     }
-};
+}
