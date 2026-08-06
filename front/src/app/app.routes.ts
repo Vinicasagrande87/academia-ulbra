@@ -38,4 +38,12 @@ export const routes: Routes = [
     path: 'treino-cadastro/:alunoId',
     loadComponent: () => import('./pages/treino-cadastro/treino-cadastro.page').then( m => m.TreinoCadastroPage)
   },
+  {
+    path: 'exercicio-cadastro',
+    loadComponent: () => import('./pages/exercicio-cadastro/exercicio-cadastro.page').then( m => m.ExercicioCadastroPage)
+  },
+  {
+    path: 'treino-editar',
+    loadComponent: () => import('./pages/treino-editar/treino-editar.page').then( m => m.TreinoEditarPage)
+  },
 ];

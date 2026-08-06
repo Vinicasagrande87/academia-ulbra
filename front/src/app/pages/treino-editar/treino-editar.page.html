@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-back-button></ion-back-button></ion-buttons>
+    <ion-title>Editar {{ dia }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card *ngFor="let item of itens; let i = index">
+    <ion-card-content>
+      <ion-item>
+        <ion-select label="Exercício" [(ngModel)]="item.exercicio_id" placeholder="Selecione">
+          <ion-select-option *ngFor="let ex of exerciciosCatalogo" [value]="ex.id">{{ ex.nome }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-input label="Carga" [(ngModel)]="item.carga" placeholder="Ex: 30kg"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input label="Repetições" [(ngModel)]="item.repeticoes" placeholder="Ex: 3x12"></ion-input>
+      </ion-item>
+      <ion-button color="danger" fill="clear" (click)="removerItem(i)">Remover</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button expand="block" (click)="adicionarItem()">+ Adicionar Exercício</ion-button>
+  <ion-button expand="block" color="success" (click)="salvarEdicao()">SALVAR ALTERAÇÕES</ion-button>
+</ion-content>

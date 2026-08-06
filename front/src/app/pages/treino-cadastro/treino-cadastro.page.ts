@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
@@ -12,7 +12,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, RouterModule]
 })
-export class TreinoCadastroPage implements OnInit {
+export class TreinoCadastroPage {
 
   diasDaSemana = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
   gruposMusculares = ['Peito', 'Costas', 'Ombro', 'Braço', 'Abdômen', 'Glúteo', 'Pernas'];
@@ -29,10 +29,13 @@ export class TreinoCadastroPage implements OnInit {
     private toastController: ToastController
   ) {}
 
-  ngOnInit() {
+  // ionViewWillEnter executa toda vez que a página entra em foco/abre
+  ionViewWillEnter() {
     this.alunoId = this.route.snapshot.paramMap.get('alunoId');
     this.carregarExercicios();
-    this.adicionarItem();
+    if (this.itens.length === 0) {
+      this.adicionarItem();
+    }
   }
 
   private getHeaders(): HttpHeaders {

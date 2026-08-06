@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home-professor"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Cadastrar Exercício</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="cadastrarExercicio()">
+    
+    <ion-item>
+      <ion-input
+        label="Nome do Exercício"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="exercicio.nome"
+        name="nome"
+        required
+        placeholder="Ex: Supino Inclinado">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-select
+        label="Grupo Muscular"
+        labelPlacement="stacked"
+        [(ngModel)]="exercicio.grupo_muscular"
+        name="grupo_muscular"
+        required
+        placeholder="Selecione o grupo">
+        <ion-select-option *ngFor="let grupo of gruposMusculares" [value]="grupo">
+          {{ grupo }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Link do Vídeo (YouTube)"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="exercicio.video_url"
+        name="video_url"
+        placeholder="Ex: https://www.youtube.com/watch?v=...">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top">
+      SALVAR EXERCÍCIO
+    </ion-button>
+  </form>
+</ion-content>

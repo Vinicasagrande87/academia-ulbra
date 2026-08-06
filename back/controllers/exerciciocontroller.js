@@ -16,19 +16,20 @@ module.exports = {
                 return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode cadastrar exercícios.' });
             }
 
-            const { nome, video_url, equipamento } = req.body;
+            const { nome, grupo_muscular, video_url, equipamento } = req.body;
             // desestruturando os dados enviados na requisição
 
             const [{ id }] = await connection('exercicios').insert({
             // insere o novo exercício na tabela exercicios
                 nome,
+                grupo_muscular,
                 video_url,
                 equipamento
             }).returning('id');
             // no Postgres precisa do .returning('id') pra receber o ID de volta,
             // e ele volta dentro de um objeto: [{ id: 5 }], por isso o [{ id }]
 
-            return res.status(201).json({ id, nome, video_url, equipamento });
+            return res.status(201).json({ id, nome, grupo_muscular, video_url, equipamento });
             // retorna o exercício recém-criado
 
         } catch (error) {
@@ -65,13 +66,14 @@ module.exports = {
             const { id } = req.params;
             // pegando o ID do exercício que vem na URL da requisição
 
-            const { nome, video_url, equipamento } = req.body;
+            const { nome, grupo_muscular, video_url, equipamento } = req.body;
             // pegando os novos dados enviados na requisição
 
             await connection('exercicios')
                 .where('id', id)
                 .update({
                     nome,
+                    grupo_muscular,
                     video_url,
                     equipamento
                 });
