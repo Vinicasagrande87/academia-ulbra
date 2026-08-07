@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="voltarPara"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Professores Cadastrados</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-button expand="block" routerLink="/professor-cadastro" class="ion-margin-bottom">
+    + Cadastrar novo professor
+  </ion-button>
+
+  <ion-list *ngIf="professores.length > 0; else semProfessores">
+    <ion-item *ngFor="let professor of professores">
+      <ion-label>
+        <h2>{{ professor.nome }}</h2>
+        <p>{{ professor.email }}</p>
+        <p *ngIf="professor.cref">CREF: {{ professor.cref }}</p>
+        <p *ngIf="professor.especialidade">{{ professor.especialidade }}</p>
+      </ion-label>
+      <ion-button fill="outline" size="small" (click)="editarProfessor(professor)">
+        Editar
+      </ion-button>
+      <ion-button fill="outline" size="small" color="danger" (click)="excluirProfessor(professor)">
+        Excluir
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semProfessores>
+    <div class="ion-text-center ion-padding">
+      <p>Nenhum professor cadastrado ainda.</p>
+    </div>
+  </ng-template>
+</ion-content>

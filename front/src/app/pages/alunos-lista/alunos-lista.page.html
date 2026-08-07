@@ -1,15 +1,23 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home-professor"></ion-back-button>
+      <ion-back-button [defaultHref]="voltarPara"></ion-back-button>
     </ion-buttons>
     <ion-title>Alunos Matriculados</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      [(ngModel)]="filtro"
+      placeholder="Buscar aluno pelo nome"
+      debounce="300"
+      showClearButton="always">
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-list *ngIf="alunos.length > 0; else semAlunos">
-    <ion-item *ngFor="let aluno of alunos" [routerLink]="['/aluno-ficha', aluno.id]" [state]="{ nome: aluno.nome }" button detail="true">
+  <ion-list *ngIf="alunosFiltrados().length > 0; else semAlunos">
+    <ion-item *ngFor="let aluno of alunosFiltrados()" [routerLink]="['/aluno-ficha', aluno.id]" [state]="{ nome: aluno.nome }" button detail="true">
       <ion-label>
         <h2>{{ aluno.nome }}</h2>
         <p>{{ aluno.email }}</p>
@@ -20,7 +28,8 @@
 
   <ng-template #semAlunos>
     <div class="ion-text-center ion-padding">
-      <p>Nenhum aluno cadastrado ainda.</p>
+      <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado ainda.</p>
+      <p *ngIf="alunos.length > 0">Nenhum aluno encontrado com esse nome.</p>
     </div>
   </ng-template>
 </ion-content>

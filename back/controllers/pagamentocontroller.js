@@ -3,100 +3,215 @@ const connection = require('../database/connections');
 module.exports = {
 
     async create (req, res){
-    // admin cadastra um novo plano de assinatura da academia (ex: mensal, trimestral)
+    // dois casos possíveis:
+    // 1) o próprio aluno sinaliza intenção de pagamento (fica "pendente")
+    // 2) admin/professor já registra um pagamento direto, já confirmado
+    //    (ex: aluno pagou na recepção e o funcionário lança na hora)
         try {
             const tipoUsuario = req.userType;
 
-            if (tipoUsuario !== 'admin') {
-            // se não for admin, bloqueia a ação
-                return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode cadastrar planos.' });
+            if (tipoUsuario === 'aluno') {
+                const { plano_id, forma_pagamento } = req.body;
+                const aluno_id = req.userId;
+                // nunca confia no aluno_id vindo do corpo da requisição — o aluno
+                // só pode criar solicitação pra si mesmo
+
+                const plano = await connection('planos').where('id', plano_id).first();
+
+                if (!plano) {
+                    return res.status(404).json({ error: 'Plano não encontrado.' });
+                }
+
+                const [{ id }] = await connection('pagamentos').insert({
+                    aluno_id,
+                    plano_id,
+                    valor: plano.valor,
+                    // o valor vem do plano no banco, não do que o front mandar,
+                    // pra ninguém conseguir manipular o preço
+                    forma_pagamento,
+                    data_pagamento: null,
+                    valido_ate: null,
+                    status: 'pendente'
+                }).returning('id');
+
+                return res.status(201).json({ id, message: 'Solicitação de pagamento registrada. Aguarde a confirmação.' });
+
+            } else if (tipoUsuario === 'admin' || tipoUsuario === 'professor') {
+                const { aluno_id, plano_id, valor, forma_pagamento, data_pagamento, observacao } = req.body;
+
+                const plano = await connection('planos').where('id', plano_id).first();
+
+                if (!plano) {
+                    return res.status(404).json({ error: 'Plano não encontrado.' });
+                }
+
+                const confirmado_por_nome = await buscarNomeStaff(tipoUsuario, req.userId);
+                const dataPagamentoFinal = data_pagamento ? new Date(data_pagamento) : new Date();
+                const validoAte = calcularValidade(dataPagamentoFinal, plano.duracao_dias);
+
+                const [{ id }] = await connection('pagamentos').insert({
+                    aluno_id,
+                    plano_id,
+                    valor,
+                    forma_pagamento,
+                    data_pagamento: dataPagamentoFinal,
+                    valido_ate: validoAte,
+                    status: 'confirmado',
+                    confirmado_por_nome,
+                    observacao
+                }).returning('id');
+
+                return res.status(201).json({ id, message: 'Pagamento registrado com sucesso!' });
+
+            } else {
+                return res.status(403).json({ error: 'Acesso negado.' });
             }
-
-            const { nome, descricao, valor, duracao_dias } = req.body;
-            // dados do plano enviados na requisição
-
-            const [{ id }] = await connection('planos').insert({
-                nome,
-                descricao,
-                valor,
-                duracao_dias
-            }).returning('id');
-            // no Postgres precisa do .returning('id') pra receber o ID de volta,
-            // e ele volta dentro de um objeto: [{ id: 5 }], por isso o [{ id }]
-
-            return res.status(201).json({ id, nome, descricao, valor, duracao_dias });
 
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Erro ao cadastrar plano.' });
+            return res.status(500).json({ error: 'Erro ao registrar pagamento.' });
         }
     },
 
     async index (req, res){
-    // lista todos os planos disponíveis, usado pelo aluno pra escolher o dele
+    // lista os pagamentos, já com o nome do aluno e do plano pra facilitar
+    // a exibição na tela, sem o front precisar cruzar os dados sozinho
         try {
-            const planos = await connection('planos').select('*');
+            const tipoUsuario = req.userType;
+            const { aluno_id, status } = req.query;
 
-            return res.json(planos);
+            let query = connection('pagamentos')
+                .join('alunos', 'alunos.id', '=', 'pagamentos.aluno_id')
+                .join('planos', 'planos.id', '=', 'pagamentos.plano_id')
+                .select(
+                    'pagamentos.id',
+                    'pagamentos.aluno_id',
+                    'alunos.nome as aluno_nome',
+                    'pagamentos.plano_id',
+                    'planos.nome as plano_nome',
+                    'pagamentos.valor',
+                    'pagamentos.forma_pagamento',
+                    'pagamentos.data_pagamento',
+                    'pagamentos.valido_ate',
+                    'pagamentos.status',
+                    'pagamentos.confirmado_por_nome',
+                    'pagamentos.observacao',
+                    'pagamentos.created_at as solicitado_em'
+                )
+                .orderBy('pagamentos.created_at', 'desc');
+
+            if (tipoUsuario === 'aluno') {
+            // aluno só pode ver os próprios pagamentos, nunca de outro aluno
+                query = query.where('pagamentos.aluno_id', req.userId);
+            } else if (tipoUsuario === 'admin' || tipoUsuario === 'professor') {
+                if (aluno_id) {
+                    query = query.where('pagamentos.aluno_id', aluno_id);
+                }
+            } else {
+                return res.status(403).json({ error: 'Acesso negado.' });
+            }
+
+            if (status) {
+            // usado pela tela do staff pra filtrar só os pendentes, por exemplo
+                query = query.where('pagamentos.status', status);
+            }
+
+            const pagamentos = await query;
+
+            return res.json(pagamentos);
 
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Erro ao listar planos.' });
+            return res.status(500).json({ error: 'Erro ao listar pagamentos.' });
         }
     },
 
     async update (req, res){
-    // admin edita um plano existente
+    // usado principalmente pelo staff pra confirmar (ou recusar) uma solicitação
+    // pendente, mas também serve pra corrigir um pagamento já registrado
         try {
             const tipoUsuario = req.userType;
 
-            if (tipoUsuario !== 'admin') {
-                return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode editar planos.' });
+            if (tipoUsuario !== 'admin' && tipoUsuario !== 'professor') {
+                return res.status(403).json({ error: 'Acesso negado. Apenas administradores e professores podem confirmar pagamentos.' });
             }
 
             const { id } = req.params;
-            // pegando o ID do plano que vem na URL da requisição
+            const { valor, forma_pagamento, data_pagamento, status, observacao } = req.body;
 
-            const { nome, descricao, valor, duracao_dias } = req.body;
+            const dadosParaAtualizar = { valor, forma_pagamento, observacao, updated_at: new Date() };
 
-            await connection('planos')
+            if (status) {
+                dadosParaAtualizar.status = status;
+            }
+
+            if (status === 'confirmado') {
+                const pagamentoAtual = await connection('pagamentos')
+                    .join('planos', 'planos.id', '=', 'pagamentos.plano_id')
+                    .select('planos.duracao_dias')
+                    .where('pagamentos.id', id)
+                    .first();
+
+                const dataPagamentoFinal = data_pagamento ? new Date(data_pagamento) : new Date();
+
+                dadosParaAtualizar.data_pagamento = dataPagamentoFinal;
+                dadosParaAtualizar.valido_ate = calcularValidade(dataPagamentoFinal, pagamentoAtual?.duracao_dias);
+                dadosParaAtualizar.confirmado_por_nome = await buscarNomeStaff(tipoUsuario, req.userId);
+            } else if (data_pagamento) {
+                dadosParaAtualizar.data_pagamento = data_pagamento;
+            }
+
+            await connection('pagamentos')
                 .where('id', id)
-                .update({
-                    nome,
-                    descricao,
-                    valor,
-                    duracao_dias
-                });
+                .update(dadosParaAtualizar);
 
-            return res.json({ message: 'Plano atualizado com sucesso!' });
+            return res.json({ message: 'Pagamento atualizado com sucesso!' });
 
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Erro ao atualizar plano.' });
+            return res.status(500).json({ error: 'Erro ao atualizar pagamento.' });
         }
     },
 
     async delete (req, res){
-    // admin remove um plano do sistema
+    // remove um pagamento, somente admin ou professor
         try {
             const tipoUsuario = req.userType;
 
-            if (tipoUsuario !== 'admin') {
-                return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode deletar planos.' });
+            if (tipoUsuario !== 'admin' && tipoUsuario !== 'professor') {
+                return res.status(403).json({ error: 'Acesso negado. Apenas administradores e professores podem deletar pagamentos.' });
             }
 
             const { id } = req.params;
 
-            await connection('planos')
+            await connection('pagamentos')
                 .where('id', id)
                 .delete();
-            // vai até a tabela planos, filtra pelo ID e apaga o registro
 
             return res.status(204).send();
 
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Erro ao deletar plano.' });
+            return res.status(500).json({ error: 'Erro ao deletar pagamento.' });
         }
     }
 };
+
+async function buscarNomeStaff(tipoUsuario, userId) {
+// busca o nome de quem está confirmando, direto no banco — o token só tem
+// id e tipo, não o nome, então não dá pra confiar em nada vindo do front
+    const tabela = tipoUsuario === 'admin' ? 'admins' : 'professores';
+    const staff = await connection(tabela).select('nome').where('id', userId).first();
+    return staff ? staff.nome : null;
+}
+
+function calcularValidade(dataPagamento, duracaoDias) {
+// soma a duração do plano (em dias) à data do pagamento, pra saber até quando vale
+    if (!duracaoDias) {
+        return null;
+    }
+
+    const validade = new Date(dataPagamento);
+    validade.setDate(validade.getDate() + duracaoDias);
+    return validade;
+}

@@ -35,6 +35,9 @@ routes.post('/professores', authMiddleware, professorController.create);
 // só o admin consegue passar (checagem de tipoUsuario dentro do controller)
 routes.get('/professores', authMiddleware, professorController.index);
 routes.put('/professores', authMiddleware, professorController.update);
+// professor edita a si mesmo (sem :id)
+routes.put('/professores/:id', authMiddleware, professorController.update);
+// admin edita qualquer professor pelo id (checagem dentro do controller)
 routes.delete('/professores/:id', authMiddleware, professorController.delete);
 
 // exercícios (catálogo do admin)

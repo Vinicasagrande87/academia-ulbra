@@ -10,24 +10,20 @@ import { AuthService } from '../../services/auth';
 // ajuste o caminho conforme a pasta real onde o auth.ts está no seu projeto
 
 @Component({
-  selector: 'app-aluno-cadastro',
-  templateUrl: './aluno-cadastro.page.html',
-  styleUrls: ['./aluno-cadastro.page.scss'],
+  selector: 'app-professor-cadastro',
+  templateUrl: './professor-cadastro.page.html',
+  styleUrls: ['./professor-cadastro.page.scss'],
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, RouterModule]
 })
-export class AlunoCadastroPage {
+export class ProfessorCadastroPage {
 
-  aluno = {
+  professor = {
     nome: '',
-    idade: null as number | null,
-    peso: null as number | null,
-    altura: null as number | null,
-    cpf: '',
-    telefone: '',
     email: '',
     senha: '',
-    finalidade: ''
+    cref: '',
+    especialidade: ''
   };
 
   voltarPara: string = '/home-professor';
@@ -47,22 +43,21 @@ export class AlunoCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
-  async cadastrarAluno() {
-    // o token é anexado automaticamente pelo authInterceptor
-    this.http.post(`${environment.apiUrl}/alunos`, this.aluno).subscribe({
+  async cadastrarProfessor() {
+    this.http.post(`${environment.apiUrl}/professores`, this.professor).subscribe({
       next: async () => {
         const toast = await this.toastController.create({
-          message: 'Aluno cadastrado com sucesso!',
+          message: 'Professor cadastrado com sucesso!',
           duration: 2000,
           color: 'success'
         });
         await toast.present();
-        this.router.navigate(['/alunos-lista']);
+        this.router.navigate(['/professores-lista']);
       },
       error: async (err) => {
-        console.error('Erro ao cadastrar aluno:', err);
+        console.error('Erro ao cadastrar professor:', err);
         const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao cadastrar aluno.',
+          message: err.error?.error || 'Erro ao cadastrar professor.',
           duration: 2500,
           color: 'danger'
         });

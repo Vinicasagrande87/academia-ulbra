@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="voltarPara"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Cadastrar Professor</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="cadastrarProfessor()">
+    <ion-item>
+      <ion-input
+        label="Nome completo"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="professor.nome"
+        name="nome"
+        required
+        placeholder="Nome completo">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="E-mail"
+        labelPlacement="stacked"
+        type="email"
+        [(ngModel)]="professor.email"
+        name="email"
+        required
+        placeholder="professor@academia.com">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Senha"
+        labelPlacement="stacked"
+        type="password"
+        [(ngModel)]="professor.senha"
+        name="senha"
+        required
+        placeholder="Senha inicial">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="CREF"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="professor.cref"
+        name="cref"
+        placeholder="Ex: 123456-G/RS">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Especialidade"
+        labelPlacement="stacked"
+        type="text"
+        [(ngModel)]="professor.especialidade"
+        name="especialidade"
+        placeholder="Ex: Musculação, Funcional">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top">
+      SALVAR PROFESSOR
+    </ion-button>
+  </form>
+</ion-content>

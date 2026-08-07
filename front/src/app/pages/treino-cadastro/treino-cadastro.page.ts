@@ -2,8 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
+// ajuste o caminho conforme o nível real da pasta "environments"
 
 @Component({
   selector: 'app-treino-cadastro',
@@ -29,7 +31,6 @@ export class TreinoCadastroPage {
     private toastController: ToastController
   ) {}
 
-  // ionViewWillEnter executa toda vez que a página entra em foco/abre
   ionViewWillEnter() {
     this.alunoId = this.route.snapshot.paramMap.get('alunoId');
     this.carregarExercicios();
@@ -38,15 +39,9 @@ export class TreinoCadastroPage {
     }
   }
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   carregarExercicios() {
-    this.http.get('http://localhost:3000/exercicios', { headers: this.getHeaders() }).subscribe({
+    // o token é anexado automaticamente pelo authInterceptor
+    this.http.get(`${environment.apiUrl}/exercicios`).subscribe({
       next: (res: any) => {
         this.exercicios = res;
       },
@@ -80,7 +75,7 @@ export class TreinoCadastroPage {
       }))
     };
 
-    this.http.post('http://localhost:3000/treinos', treino, { headers: this.getHeaders() }).subscribe({
+    this.http.post(`${environment.apiUrl}/treinos`, treino).subscribe({
       next: async () => {
         const toast = await this.toastController.create({
           message: 'Treino montado com sucesso!',

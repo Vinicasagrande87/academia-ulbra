@@ -7,8 +7,10 @@ module.exports = {
     // função para o professor ou admin cadastrar um novo treino para o aluno
         try {
             const tipoUsuario = req.userType;
-            const professor_id = req.userId;
-            // pega o tipo e o id de quem está logado
+            // só grava professor_id quando quem está logado é de fato um professor;
+            // se for admin, o id dele não existe na tabela "professores" (são
+            // tabelas separadas), então salvamos null pra não violar a FK
+            const professor_id = tipoUsuario === 'professor' ? req.userId : null;
 
             if (tipoUsuario !== 'admin' && tipoUsuario !== 'professor') {
                 return res.status(403).json({ error: 'Acesso negado. Apenas administradores e professores podem montar treinos.' });
@@ -16,6 +18,19 @@ module.exports = {
 
             const { aluno_id, dia_semana, exercicios } = req.body;
             // desestruturando os dados enviados na requisição
+
+            const alunoComPlanoAtivo = await connection('pagamentos')
+                .where('aluno_id', aluno_id)
+                .andWhere('status', 'confirmado')
+                .andWhere('valido_ate', '>=', new Date())
+                .first();
+            // trava: só deixa montar treino novo se o aluno tiver um pagamento
+            // confirmado cuja validade ainda não passou. Isso não afeta a edição
+            // de um treino já existente, só a criação de um novo.
+
+            if (!alunoComPlanoAtivo) {
+                return res.status(403).json({ error: 'Este aluno não tem um plano ativo. Confirme o pagamento na tela financeira antes de montar o treino.' });
+            }
 
             const [{ id }] = await connection('treinos').insert({
                 aluno_id,
@@ -47,7 +62,8 @@ module.exports = {
 
     async index (req, res){
     // lista os treinos: se vier aluno_id na query, filtra só os desse aluno
-    // (usado na ficha de treino clicada a partir da lista de alunos);
+    // (usado na ficha de treino clicada a partir da lista de alunos, e também
+    // pela tela de edição, que filtra o dia certo a partir desses dados);
     // sem aluno_id, lista os treinos de todos
         try {
             const tipoUsuario = req.userType;
@@ -69,9 +85,12 @@ module.exports = {
 
             for (const treino of treinos) {
             // pra cada treino, busca os exercícios com carga, repetição e vídeo
+            // incluindo exercicio_id, que a tela de edição precisa pra pré-selecionar
+            // o exercício certo no <ion-select>
                 treino.exercicios = await connection('treino_itens')
                     .join('exercicios', 'exercicios.id', '=', 'treino_itens.exercicio_id')
                     .select(
+                        'treino_itens.exercicio_id',
                         'exercicios.nome as exercicio_nome',
                         'exercicios.video_url',
                         'exercicios.equipamento',
@@ -93,6 +112,9 @@ module.exports = {
 
     async update (req, res){
     // edita um treino existente, permitido para admin ou professor
+    // agora também substitui os itens (exercícios) do treino quando enviados
+    // (sem checagem de plano ativo aqui — a trava é só na criação, editar um
+    // treino que já existe continua liberado)
         try {
             const tipoUsuario = req.userType;
 
@@ -101,11 +123,29 @@ module.exports = {
             }
 
             const { id } = req.params;
-            const { dia_semana } = req.body;
+            const { dia_semana, exercicios } = req.body;
 
             await connection('treinos')
                 .where('id', id)
                 .update({ dia_semana });
+
+            if (exercicios) {
+            // se vier a lista de exercícios, substitui os itens antigos pelos novos
+            // (apaga tudo e reinsere, mais simples do que comparar item a item)
+                await connection('treino_itens').where('treino_id', id).delete();
+
+                if (exercicios.length > 0) {
+                    const itensParaInserir = exercicios.map(item => ({
+                        treino_id: id,
+                        exercicio_id: item.exercicio_id,
+                        carga: item.carga,
+                        repeticoes: item.repeticoes,
+                        ordem: item.ordem
+                    }));
+
+                    await connection('treino_itens').insert(itensParaInserir);
+                }
+            }
 
             return res.json({ message: 'Treino atualizado com sucesso!' });
 

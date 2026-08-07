@@ -13,8 +13,14 @@
 <ion-content class="ion-padding">
   <div class="welcome-banner">
     <h2>Olá, Aluno(a)!</h2>
-    <p>Acompanhe seus treinos, histórico e sua situação financeira.</p>
+    <p>Acompanhe seus treinos e sua situação financeira.</p>
   </div>
+
+  <ion-card *ngIf="avisoPlano" [color]="avisoPlano.cor" routerLink="/aluno-financeiro" button>
+    <ion-card-content>
+      {{ avisoPlano.mensagem }}
+    </ion-card-content>
+  </ion-card>
 
   <ion-grid>
     <ion-row>
@@ -25,28 +31,6 @@
             <ion-icon name="barbell-outline" size="large" color="primary"></ion-icon>
             <ion-card-title>Meus Treinos</ion-card-title>
             <p>Visualizar suas fichas de treino atuais</p>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <!-- Biblioteca de Exercícios -->
-      <ion-col size="12" size-md="6">
-        <ion-card routerLink="/aluno-exercicios" class="menu-card">
-          <ion-card-content class="ion-text-center">
-            <ion-icon name="fitness-outline" size="large" color="tertiary"></ion-icon>
-            <ion-card-title>Biblioteca de Exercícios</ion-card-title>
-            <p>Consultar lista de exercícios e vídeos explicativos</p>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <!-- Histórico de Treinos -->
-      <ion-col size="12" size-md="6">
-        <ion-card routerLink="/aluno-historico" class="menu-card">
-          <ion-card-content class="ion-text-center">
-            <ion-icon name="time-outline" size="large" color="secondary"></ion-icon>
-            <ion-card-title>Histórico de Treinos</ion-card-title>
-            <p>Ver evoluções e fichas anteriores</p>
           </ion-card-content>
         </ion-card>
       </ion-col>

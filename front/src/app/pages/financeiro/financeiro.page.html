@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="voltarPara"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Planos e Pagamentos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h2>Planos cadastrados</h2>
+
+  <ion-card *ngFor="let plano of planos">
+    <ion-card-header>
+      <ion-card-title>{{ plano.nome }}</ion-card-title>
+      <ion-card-subtitle>R$ {{ plano.valor }} • {{ plano.duracao_dias }} dias</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>{{ plano.descricao }}</ion-card-content>
+  </ion-card>
+
+  <h2 class="ion-margin-top">Pagamentos</h2>
+
+  <ion-segment [(ngModel)]="filtroStatus" (ionChange)="carregarPagamentos()">
+    <ion-segment-button value="pendente">
+      <ion-label>Pendentes</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="">
+      <ion-label>Todos</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <ion-list *ngIf="pagamentos.length > 0; else semPagamentos">
+    <ion-item *ngFor="let pagamento of pagamentos">
+      <ion-label>
+        <h3>{{ pagamento.aluno_nome }}</h3>
+        <p>{{ pagamento.plano_nome }} • R$ {{ pagamento.valor }} • {{ formaPagamentoLabel(pagamento.forma_pagamento) }}</p>
+        <p *ngIf="pagamento.status === 'confirmado'">
+          Confirmado em {{ pagamento.data_pagamento | date:'dd/MM/yyyy' }} por {{ pagamento.confirmado_por_nome }}
+        </p>
+        <p *ngIf="pagamento.observacao">{{ pagamento.observacao }}</p>
+      </ion-label>
+      <ion-badge slot="end" [color]="pagamento.status === 'confirmado' ? 'success' : 'warning'">
+        {{ pagamento.status === 'confirmado' ? 'Confirmado' : 'Pendente' }}
+      </ion-badge>
+      <ion-button *ngIf="pagamento.status === 'pendente'" fill="outline" size="small" (click)="confirmarPagamento(pagamento)">
+        Confirmar
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semPagamentos>
+    <p class="ion-text-center">Nenhum pagamento encontrado.</p>
+  </ng-template>
+</ion-content>

@@ -9,8 +9,13 @@
   <ion-card *ngFor="let item of itens; let i = index">
     <ion-card-content>
       <ion-item>
-        <ion-select label="Exercício" [(ngModel)]="item.exercicio_id" placeholder="Selecione">
-          <ion-select-option *ngFor="let ex of exerciciosCatalogo" [value]="ex.id">{{ ex.nome }}</ion-select-option>
+        <ion-select label="Grupo Muscular" [(ngModel)]="item.grupo" placeholder="Selecione">
+          <ion-select-option *ngFor="let grupo of gruposMusculares" [value]="grupo">{{ grupo }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-select label="Exercício" [(ngModel)]="item.exercicio_id" placeholder="Selecione" [disabled]="!item.grupo">
+          <ion-select-option *ngFor="let ex of exerciciosDoGrupo(item.grupo)" [value]="ex.id">{{ ex.nome }}</ion-select-option>
         </ion-select>
       </ion-item>
       <ion-item>

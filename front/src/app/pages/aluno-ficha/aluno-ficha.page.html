@@ -8,7 +8,18 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-button expand="block" [routerLink]="['/treino-cadastro', alunoId]" class="ion-margin-bottom">
+  <ion-card *ngIf="situacaoPlano" [color]="situacaoPlano.cor">
+    <ion-card-content>
+      {{ situacaoPlano.mensagem }}
+      <span *ngIf="planoBloqueado()"> Confirme o pagamento na tela financeira antes de montar um treino novo pra esse aluno.</span>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button
+    expand="block"
+    [routerLink]="['/treino-cadastro', alunoId]"
+    [disabled]="planoBloqueado()"
+    class="ion-margin-bottom">
     + Montar novo treino
   </ion-button>
 
@@ -17,9 +28,14 @@
       <ion-card-header>
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <ion-card-title>{{ treino.dia_semana }}</ion-card-title>
-          <ion-button fill="outline" size="small" [routerLink]="['/treino-editar', alunoId, treino.dia_semana]">
-            Editar Dia
-          </ion-button>
+          <div>
+            <ion-button fill="outline" size="small" [routerLink]="['/treino-editar', alunoId, treino.dia_semana]">
+              Editar Dia
+            </ion-button>
+            <ion-button fill="outline" size="small" color="danger" (click)="excluirTreino(treino)">
+              Excluir
+            </ion-button>
+          </div>
         </div>
       </ion-card-header>
 

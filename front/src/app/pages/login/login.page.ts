@@ -2,10 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { addIcons } from 'ionicons';
-import { logOutOutline } from 'ionicons/icons';
+import { AuthService } from '../../services/auth';
+// ajuste o caminho conforme a pasta real onde o auth.ts está no seu projeto
 
 @Component({
   selector: 'app-login',
@@ -22,24 +21,18 @@ export class LoginPage {
   };
 
   constructor(
-    private http: HttpClient,
+    private authService: AuthService,
     private toastController: ToastController,
     private router: Router
-  ) {
-    addIcons({
-      'log-out-outline': logOutOutline
-    });
-  }
+  ) {}
 
   async fazerLogin() {
-    this.http.post('http://localhost:3000/login', this.credentials).subscribe({
+    this.authService.login(this.credentials).subscribe({
       next: async (res: any) => {
-        // Salva o token e dados do usuário no localStorage
+        // o backend sempre retorna { id, nome, tipo, token } direto, sem precisar
+        // adivinhar em qual campo o usuário veio
         localStorage.setItem('token', res.token);
-
-        // Pega o usuário de onde quer que ele venha na resposta
-        const usuario = res.usuario || res.user || res.dados || res;
-        localStorage.setItem('user', JSON.stringify(usuario));
+        localStorage.setItem('user', JSON.stringify({ id: res.id, nome: res.nome, tipo: res.tipo }));
 
         const toast = await this.toastController.create({
           message: 'Login realizado com sucesso!',
@@ -48,18 +41,18 @@ export class LoginPage {
         });
         await toast.present();
 
-        // O back-end sempre retorna o tipo do usuário (admin, professor ou aluno)
-        const tipo = (usuario.tipo || '').toLowerCase();
+        const tipo = (res.tipo || '').toLowerCase();
 
-        // Se for aluno, manda para a área do aluno. Caso contrário, painel do professor/admin.
         if (tipo === 'aluno') {
           this.router.navigate(['/home-aluno']);
+        } else if (tipo === 'admin') {
+          this.router.navigate(['/home-admin']);
         } else {
           this.router.navigate(['/home-professor']);
         }
       },
       error: async (err) => {
-        console.error(err);
+        console.error('Erro ao fazer login:', err);
         const toast = await this.toastController.create({
           message: err.error?.error || 'E-mail ou senha inválidos.',
           duration: 2500,
@@ -68,12 +61,5 @@ export class LoginPage {
         await toast.present();
       }
     });
-  }
-
-  sair() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.credentials.email = '';
-    this.credentials.senha = '';
   }
 }

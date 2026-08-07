@@ -5,8 +5,15 @@ const bcrypt = require('bcryptjs');
 module.exports = {
 
     async index (req, res){
-    // lista todos os professores cadastrados
+    // lista todos os professores cadastrados — só o admin gerencia professores,
+    // então essa listagem fica restrita a ele (antes não tinha checagem nenhuma)
         try {
+            const tipoUsuario = req.userType;
+
+            if (tipoUsuario !== 'admin') {
+                return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode listar professores.' });
+            }
+
             const professores = await connection('professores')
                 .select('id', 'nome', 'email', 'cref', 'especialidade');
             // não retorna a senha, por segurança
@@ -23,18 +30,14 @@ module.exports = {
     // cadastra um novo professor no sistema, somente o admin pode fazer isso
         try {
             const tipoUsuario = req.userType;
-            // pega o tipo do usuário logado
 
             if (tipoUsuario !== 'admin') {
-            // se não for admin, bloqueia a ação
                 return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode cadastrar professores.' });
             }
 
             const { nome, email, senha, cref, especialidade } = req.body;
-            // dados enviados na requisição
 
             const senhaCriptografada = await bcrypt.hash(senha, 8);
-            // criptografa a senha antes de guardar no banco
 
             const [{ id }] = await connection('professores').insert({
                 nome,
@@ -43,11 +46,8 @@ module.exports = {
                 cref,
                 especialidade
             }).returning('id');
-            // no Postgres precisa do .returning('id') pra receber o ID de volta,
-            // e ele volta dentro de um objeto: [{ id: 5 }], por isso o [{ id }]
 
             return res.status(201).json({ id, nome, email, cref, especialidade });
-            // retorna os dados do professor recém-criado (sem a senha)
 
         } catch (error) {
             console.error(error);
@@ -56,23 +56,30 @@ module.exports = {
     },
 
     async update (req, res){
-    // professor edita o próprio cadastro
+    // dois caminhos possíveis:
+    // 1) o próprio professor edita a si mesmo, via PUT /professores (sem :id)
+    // 2) o admin edita qualquer professor, via PUT /professores/:id
         try {
-            const id = req.userId;
-            // faz com que a edição seja feita somente no professor que esta logado
+            const tipoUsuario = req.userType;
+            const idParam = req.params.id;
+
+            let idAlvo;
+
+            if (tipoUsuario === 'professor' && !idParam) {
+                idAlvo = req.userId;
+            } else if (tipoUsuario === 'admin' && idParam) {
+                idAlvo = idParam;
+            } else {
+            // cobre: professor tentando editar outro (via /professores/:id),
+            // admin chamando sem id, ou aluno tentando qualquer uma das duas
+                return res.status(403).json({ error: 'Acesso negado.' });
+            }
 
             const { nome, email, cref, especialidade } = req.body;
-            // pegando os novos dados enviados na requisição
 
             await connection('professores')
-                .where('id', id)
-                .update({
-                    nome,
-                    email,
-                    cref,
-                    especialidade
-                });
-                // atualiza os dados no banco
+                .where('id', idAlvo)
+                .update({ nome, email, cref, especialidade });
 
             return res.json({ message: 'Atualizado com sucesso!' });
 
@@ -92,12 +99,10 @@ module.exports = {
             }
 
             const { id } = req.params;
-            // pegando o ID do professor que vem na URL da requisição
 
             await connection('professores')
                 .where('id', id)
                 .delete();
-            // vai até a tabela professores, filtra pelo ID e apaga o registro
 
             return res.status(204).send();
 

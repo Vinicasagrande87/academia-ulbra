@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Painel do Professor / Admin</ion-title>
+    <ion-title>{{ isAdmin ? 'Painel do Admin' : 'Painel do Professor' }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="logout()" color="light">
         <ion-icon name="log-out-outline" style="margin-right: 5px;"></ion-icon>
@@ -35,18 +35,7 @@
           <ion-card-content class="ion-text-center">
             <ion-icon name="people-outline" size="large" color="primary"></ion-icon>
             <ion-card-title>Alunos Cadastrados</ion-card-title>
-            <p>Visualizar e gerenciar alunos</p>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <!-- Gerenciar Treinos (Editar/Deletar) -->
-      <ion-col size="12" size-md="6">
-        <ion-card routerLink="/treinos-lista" class="menu-card">
-          <ion-card-content class="ion-text-center">
-            <ion-icon name="create-outline" size="large" color="secondary"></ion-icon>
-            <ion-card-title>Gerenciar Treinos</ion-card-title>
-            <p>Editar ou remover treinos cadastrados</p>
+            <p>Visualizar e gerenciar alunos, montar e editar treinos</p>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -74,4 +63,49 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+
+  <!-- Seção exclusiva do admin — professor não vê nada daqui pra baixo -->
+  <div *ngIf="isAdmin">
+    <div class="welcome-banner ion-margin-top">
+      <h2>Administração</h2>
+      <p>Gerenciamento de professores e da vitrine de planos.</p>
+    </div>
+
+    <ion-grid>
+      <ion-row>
+        <!-- Cadastrar Professor -->
+        <ion-col size="12" size-md="6">
+          <ion-card routerLink="/professor-cadastro" class="menu-card">
+            <ion-card-content class="ion-text-center">
+              <ion-icon name="person-add-outline" size="large" color="dark"></ion-icon>
+              <ion-card-title>Cadastrar Professor</ion-card-title>
+              <p>Registrar novos professores no sistema</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Professores Cadastrados -->
+        <ion-col size="12" size-md="6">
+          <ion-card routerLink="/professores-lista" class="menu-card">
+            <ion-card-content class="ion-text-center">
+              <ion-icon name="people-outline" size="large" color="dark"></ion-icon>
+              <ion-card-title>Professores Cadastrados</ion-card-title>
+              <p>Editar ou remover professores</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Gerenciar Planos -->
+        <ion-col size="12" size-md="6">
+          <ion-card routerLink="/planos-gerenciar" class="menu-card">
+            <ion-card-content class="ion-text-center">
+              <ion-icon name="pricetag-outline" size="large" color="dark"></ion-icon>
+              <ion-card-title>Gerenciar Planos</ion-card-title>
+              <p>Criar, editar ou remover planos da vitrine</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
 </ion-content>

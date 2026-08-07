@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="voltarPara"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gerenciar Planos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-button expand="block" (click)="abrirFormularioNovo()" class="ion-margin-bottom">
+    + Novo plano
+  </ion-button>
+
+  <ion-list *ngIf="planos.length > 0; else semPlanos">
+    <ion-item *ngFor="let plano of planos">
+      <ion-label>
+        <h2>{{ plano.nome }}</h2>
+        <p>R$ {{ plano.valor }} • {{ plano.duracao_dias }} dias</p>
+        <p>{{ plano.descricao }}</p>
+      </ion-label>
+      <ion-button fill="outline" size="small" (click)="editarPlano(plano)">
+        Editar
+      </ion-button>
+      <ion-button fill="outline" size="small" color="danger" (click)="excluirPlano(plano)">
+        Excluir
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semPlanos>
+    <div class="ion-text-center ion-padding">
+      <p>Nenhum plano cadastrado ainda.</p>
+    </div>
+  </ng-template>
+</ion-content>

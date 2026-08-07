@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home-aluno"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Planos e Pagamentos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card *ngIf="situacaoPlano" [color]="situacaoPlano.cor">
+    <ion-card-content>
+      {{ situacaoPlano.mensagem }}
+    </ion-card-content>
+  </ion-card>
+
+  <h2>Planos disponíveis</h2>
+
+  <ion-card *ngFor="let plano of planos">
+    <ion-card-header>
+      <ion-card-title>{{ plano.nome }}</ion-card-title>
+      <ion-card-subtitle>R$ {{ plano.valor }} • {{ plano.duracao_dias }} dias</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ plano.descricao }}</p>
+      <ion-button expand="block" (click)="escolherPlano(plano)">
+        Escolher este plano
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <h2 class="ion-margin-top">Seus pagamentos</h2>
+
+  <ion-list *ngIf="pagamentos.length > 0; else semPagamentos">
+    <ion-item *ngFor="let pagamento of pagamentos">
+      <ion-label>
+        <h3>{{ pagamento.plano_nome }}</h3>
+        <p>R$ {{ pagamento.valor }} • {{ formaPagamentoLabel(pagamento.forma_pagamento) }}</p>
+        <p *ngIf="pagamento.status === 'confirmado'">
+          Pago em {{ pagamento.data_pagamento | date:'dd/MM/yyyy' }} • Válido até {{ pagamento.valido_ate | date:'dd/MM/yyyy' }}
+        </p>
+      </ion-label>
+      <ion-badge slot="end" [color]="pagamento.status === 'confirmado' ? 'success' : 'warning'">
+        {{ pagamento.status === 'confirmado' ? 'Confirmado' : 'Pendente' }}
+      </ion-badge>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semPagamentos>
+    <p class="ion-text-center">Você ainda não tem nenhum pagamento registrado.</p>
+  </ng-template>
+</ion-content>
