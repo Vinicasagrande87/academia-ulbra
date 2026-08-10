@@ -1,6 +1,5 @@
-const serverless = require('serverless-http');
-const app = require('../server');
-// reaproveita o mesmo app Express do server.js, sem duplicar nenhuma rota
-// ou configuração — só embrulha ele no formato que o Vercel espera
-
-module.exports = serverless(app);
+module.exports = require('../server');
+// um app Express já é, por natureza, uma função (req, res) => void — o
+// próprio formato que o runtime Node do Vercel espera. Não precisa de
+// nenhum "tradutor" no meio (o serverless-http era pra AWS Lambda, que
+// tem um formato de função bem diferente, e estava travando as respostas)
