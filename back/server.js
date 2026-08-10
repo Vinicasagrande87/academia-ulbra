@@ -1,9 +1,9 @@
-require ('dotenv').config();
+require('dotenv').config();
 // estou deixando a chave do .env disponivel neste arquivo
 
 const express = require('express');
 // estou atribuindo a variavel express as funcionalidades do framework express
-const cors = require ('cors');
+const cors = require('cors');
 // estou atribuindo as funcionalidades da biblioteca cors na variavel cors, responsavel por
 // permitir o acesso do front end
 const helmet = require('helmet');
@@ -17,20 +17,27 @@ const routes = require('./routes');
 const app = express();
 //estou atribuindo as funcionalidade do framework express na variavel app
 
-const PORT = process.env.PORT || 3000;
-// estou atribuindo a variavel PORT a porta logica que tenho no .env caso ela não
-// funcione deixei a chave 3000 de reserva
-
 app.use(helmet());
 // aplica os headers de segurança em todas as respostas
 
+const origensPermitidas = (process.env.FRONT_URL || '')
+    .split(',')
+    .map(origem => origem.trim())
+    .filter(Boolean);
+// FRONT_URL agora aceita várias origens separadas por vírgula (ex: front local +
+// front publicado no Vercel + o app nativo), já que em produção o front não
+// roda mais só em um lugar único como no desenvolvimento
+
 app.use(cors({
-    origin: process.env.FRONT_URL
-    // libera acesso só pro domínio do seu front, configurado no .env
-    // em desenvolvimento, coloque algo como http://localhost:4200 (porta padrão do Angular)
+    origin: function (origin, callback) {
+        // requisições sem "origin" (como chamadas vindas do app nativo em
+        // alguns casos, ou ferramentas tipo Thunder Client) são liberadas
+        if (!origin || origensPermitidas.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Não permitido pelo CORS'));
+    }
 }));
-// aqui peguei as funcionalidades do framework express contidas na variavel app e com o
-//comando use, iniciei os cors, agora restrito só ao front autorizado
 
 app.use(express.json());
 // aqui pus em uso o midware que fara a tradução do json para o express
@@ -51,9 +58,16 @@ app.use(routes);
 // rodar a resposta de quando meu servidor estiver online e tambem para usar futuramenta
 //para meu arquivo de rotas
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
-// aqui estou informando qual a porta logica meu servidor vai funcionar e com o comando
-// app.listen eu deixo ele rodando, caso não tivesse esse comando meu servidor não se
-// ficaria ligado
+if (require.main === module) {
+    // só sobe o servidor "tradicional" (app.listen) quando este arquivo é
+    // executado diretamente (ex: "node server.js" no seu computador). No
+    // Vercel, quem chama esse app é o arquivo api/index.js, de outro jeito
+    // (sem app.listen, porque lá funciona como função serverless)
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Servidor rodando na porta ${PORT}`);
+    });
+}
+
+module.exports = app;
+// exporta o app pra poder ser reaproveitado pelo Vercel (api/index.js)
