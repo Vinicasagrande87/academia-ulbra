@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
-// ajuste o caminho conforme a pasta real onde o auth.ts está no seu projeto
 
 @Component({
   selector: 'app-login',
@@ -20,6 +19,8 @@ export class LoginPage {
     senha: ''
   };
 
+  carregando = false;
+
   constructor(
     private authService: AuthService,
     private toastController: ToastController,
@@ -27,10 +28,13 @@ export class LoginPage {
   ) {}
 
   async fazerLogin() {
+    if (this.carregando) {
+      return;
+    }
+    this.carregando = true;
+
     this.authService.login(this.credentials).subscribe({
       next: async (res: any) => {
-        // o backend sempre retorna { id, nome, tipo, token } direto, sem precisar
-        // adivinhar em qual campo o usuário veio
         localStorage.setItem('token', res.token);
         localStorage.setItem('user', JSON.stringify({ id: res.id, nome: res.nome, tipo: res.tipo }));
 
@@ -52,6 +56,8 @@ export class LoginPage {
         }
       },
       error: async (err) => {
+        this.carregando = false;
+
         console.error('Erro ao fazer login:', err);
         const toast = await this.toastController.create({
           message: err.error?.error || 'E-mail ou senha inválidos.',

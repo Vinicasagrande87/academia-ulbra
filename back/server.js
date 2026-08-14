@@ -50,8 +50,8 @@ const loginLimiter = rateLimit({
     message: { error: 'Muitas tentativas de login. Tente novamente mais tarde.' }
 });
 
-app.use('/login', loginLimiter);
-// aplica o limite só na rota de login, que é o alvo mais comum de ataque de força bruta
+// app.use('/login', loginLimiter);
+// DESATIVADO TEMPORARIAMENTE para facilitar os testes de login em desenvolvimento
 
 app.use(routes);
 // aqui pus com o comando app.use(routes), as funcionalidade da ferramenta Router para
