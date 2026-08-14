@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx ionic build",
+  "buildCommand": "npx @ionic/cli build",
   "outputDirectory": "www",
   "rewrites": [
     {
