@@ -1,6 +1,8 @@
 const connection = require('../database/connections');
 const bcrypt = require('bcryptjs');
 // biblioteca pra criptografar a senha do aluno antes de salvar no banco
+const { enviarEmailCadastroAluno } = require('../services/mailer');
+// serviço de envio de e-mail com as credenciais do aluno recém-cadastrado
 
 module.exports = {
 
@@ -30,6 +32,14 @@ module.exports = {
                 finalidade
             }).returning('id');
             // no Postgres precisa do .returning('id') pra receber o ID de volta
+
+            // dispara o e-mail com a senha em texto puro (a que veio do formulário,
+            // não a criptografada — a criptografada não daria pra reverter mesmo).
+            // não usamos "await" aqui de propósito: se o e-mail demorar ou falhar,
+            // isso não pode travar nem derrubar a resposta do cadastro
+            enviarEmailCadastroAluno({ nome, email, senha }).catch(err => {
+                console.error('Erro ao enviar e-mail de cadastro:', err);
+            });
 
             return res.status(201).json({ id, nome, idade, peso, altura, cpf, telefone, email, finalidade });
 

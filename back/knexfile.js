@@ -1,30 +1,22 @@
 require('dotenv').config();
 
-module.exports = {
-  development: {
-    client: 'pg',
-    connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    },
-    migrations: {
-      directory: './database/migrations'
-    }
+// agora só existe um banco de verdade: o do Supabase. Tanto rodando local
+// quanto em produção, sempre usa a mesma conexão — sem confusão de qual
+// ambiente está apontando pra onde
+const conexaoSupabase = {
+  client: 'pg',
+  connection: {
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+    // Supabase exige conexão criptografada; rejectUnauthorized: false
+    // evita erro de certificado autoassinado
   },
-
-  production: {
-    client: 'pg',
-    connection: {
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-      // Supabase exige conexão criptografada; rejectUnauthorized: false
-      // evita erro de certificado autoassinado em ambiente serverless
-    },
-    migrations: {
-      directory: './database/migrations'
-    }
+  migrations: {
+    directory: './database/migrations'
   }
+};
+
+module.exports = {
+  development: conexaoSupabase,
+  production: conexaoSupabase
 };

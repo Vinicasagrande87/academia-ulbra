@@ -28,6 +28,7 @@
         type="email"
         [(ngModel)]="professor.email"
         name="email"
+        autocomplete="off"
         required
         placeholder="professor@academia.com">
       </ion-input>
@@ -40,6 +41,7 @@
         type="password"
         [(ngModel)]="professor.senha"
         name="senha"
+        autocomplete="new-password"
         required
         placeholder="Senha inicial">
       </ion-input>
