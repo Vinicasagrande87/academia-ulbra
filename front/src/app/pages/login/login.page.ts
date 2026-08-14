@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
@@ -24,7 +24,8 @@ export class LoginPage {
   constructor(
     private authService: AuthService,
     private toastController: ToastController,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) {}
 
   async fazerLogin() {
@@ -46,14 +47,17 @@ export class LoginPage {
         await toast.present();
 
         const tipo = (res.tipo || '').toLowerCase();
+        let destino = '/home-professor';
 
         if (tipo === 'aluno') {
-          this.router.navigate(['/home-aluno']);
+          destino = '/home-aluno';
         } else if (tipo === 'admin') {
-          this.router.navigate(['/home-admin']);
-        } else {
-          this.router.navigate(['/home-professor']);
+          destino = '/home-admin';
         }
+
+        this.ngZone.run(() => {
+          this.router.navigate([destino]);
+        });
       },
       error: async (err) => {
         this.carregando = false;
