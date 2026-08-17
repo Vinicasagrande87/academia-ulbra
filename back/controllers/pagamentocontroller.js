@@ -37,6 +37,9 @@ module.exports = {
                 return res.status(201).json({ id, message: 'Solicitação de pagamento registrada. Aguarde a confirmação.' });
 
             } else if (tipoUsuario === 'admin' || tipoUsuario === 'professor') {
+                // aqui o "valor" continua vindo direto do body (decisão de negócio):
+                // staff pode ajustar/dar desconto na hora de registrar o pagamento,
+                // diferente do fluxo do aluno, que sempre usa o valor do plano
                 const { aluno_id, plano_id, valor, forma_pagamento, data_pagamento, observacao } = req.body;
 
                 const plano = await connection('planos').where('id', plano_id).first();
@@ -78,47 +81,83 @@ module.exports = {
     // a exibição na tela, sem o front precisar cruzar os dados sozinho
         try {
             const tipoUsuario = req.userType;
-            const { aluno_id, status } = req.query;
+            const { aluno_id, status, page, limit } = req.query;
 
-            let query = connection('pagamentos')
-                .join('alunos', 'alunos.id', '=', 'pagamentos.aluno_id')
-                .join('planos', 'planos.id', '=', 'pagamentos.plano_id')
-                .select(
-                    'pagamentos.id',
-                    'pagamentos.aluno_id',
-                    'alunos.nome as aluno_nome',
-                    'pagamentos.plano_id',
-                    'planos.nome as plano_nome',
-                    'pagamentos.valor',
-                    'pagamentos.forma_pagamento',
-                    'pagamentos.data_pagamento',
-                    'pagamentos.valido_ate',
-                    'pagamentos.status',
-                    'pagamentos.confirmado_por_nome',
-                    'pagamentos.observacao',
-                    'pagamentos.created_at as solicitado_em'
-                )
-                .orderBy('pagamentos.created_at', 'desc');
+            const montarQueryBase = () => {
+                let query = connection('pagamentos')
+                    .join('alunos', 'alunos.id', '=', 'pagamentos.aluno_id')
+                    .join('planos', 'planos.id', '=', 'pagamentos.plano_id');
 
-            if (tipoUsuario === 'aluno') {
-            // aluno só pode ver os próprios pagamentos, nunca de outro aluno
-                query = query.where('pagamentos.aluno_id', req.userId);
-            } else if (tipoUsuario === 'admin' || tipoUsuario === 'professor') {
-                if (aluno_id) {
-                    query = query.where('pagamentos.aluno_id', aluno_id);
+                if (tipoUsuario === 'aluno') {
+                // aluno só pode ver os próprios pagamentos, nunca de outro aluno
+                    query = query.where('pagamentos.aluno_id', req.userId);
+                } else if (tipoUsuario === 'admin' || tipoUsuario === 'professor') {
+                    if (aluno_id) {
+                        query = query.where('pagamentos.aluno_id', aluno_id);
+                    }
+                } else {
+                    return null;
                 }
-            } else {
+
+                if (status) {
+                // usado pela tela do staff pra filtrar só os pendentes, por exemplo
+                    query = query.where('pagamentos.status', status);
+                }
+
+                return query;
+            };
+
+            const queryBase = montarQueryBase();
+
+            if (!queryBase) {
                 return res.status(403).json({ error: 'Acesso negado.' });
             }
 
-            if (status) {
-            // usado pela tela do staff pra filtrar só os pendentes, por exemplo
-                query = query.where('pagamentos.status', status);
+            const colunas = [
+                'pagamentos.id',
+                'pagamentos.aluno_id',
+                'alunos.nome as aluno_nome',
+                'pagamentos.plano_id',
+                'planos.nome as plano_nome',
+                'pagamentos.valor',
+                'pagamentos.forma_pagamento',
+                'pagamentos.data_pagamento',
+                'pagamentos.valido_ate',
+                'pagamentos.status',
+                'pagamentos.confirmado_por_nome',
+                'pagamentos.observacao',
+                'pagamentos.created_at as solicitado_em'
+            ];
+
+            if (!page && !limit) {
+            // sem parâmetros de paginação: mantém o comportamento antigo,
+            // devolve a lista inteira
+                const pagamentos = await queryBase
+                    .clone()
+                    .select(colunas)
+                    .orderBy('pagamentos.created_at', 'desc');
+                return res.json(pagamentos);
             }
 
-            const pagamentos = await query;
+            const paginaAtual = Math.max(parseInt(page, 10) || 1, 1);
+            const porPagina = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+            const offset = (paginaAtual - 1) * porPagina;
 
-            return res.json(pagamentos);
+            const [{ total }] = await queryBase.clone().count('pagamentos.id as total');
+
+            const pagamentos = await queryBase
+                .clone()
+                .select(colunas)
+                .orderBy('pagamentos.created_at', 'desc')
+                .limit(porPagina)
+                .offset(offset);
+
+            return res.json({
+                data: pagamentos,
+                pagina: paginaAtual,
+                totalPaginas: Math.ceil(total / porPagina),
+                totalRegistros: Number(total)
+            });
 
         } catch (error) {
             console.error(error);

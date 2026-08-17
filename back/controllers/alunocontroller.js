@@ -17,8 +17,9 @@ module.exports = {
 
             const { nome, idade, peso, altura, cpf, telefone, email, senha, finalidade } = req.body;
 
-            const senhaCriptografada = await bcrypt.hash(senha, 8);
+            const senhaCriptografada = await bcrypt.hash(senha, 10);
             // criptografa a senha antes de guardar no banco, nunca salvamos ela pura
+            // custo 10 (era 8): padrão mais recomendado atualmente, ainda roda rápido
 
             const [{ id }] = await connection('alunos').insert({
                 nome,
@@ -58,11 +59,39 @@ module.exports = {
                 return res.status(403).json({ error: 'Acesso negado. Apenas administradores e professores podem listar alunos.' });
             }
 
-            const alunos = await connection('alunos')
-                .select('id', 'nome', 'idade', 'peso', 'altura', 'cpf', 'telefone', 'email', 'finalidade');
+            const colunas = ['id', 'nome', 'idade', 'peso', 'altura', 'cpf', 'telefone', 'email', 'finalidade'];
             // nunca selecionamos a coluna senha, por segurança
 
-            return res.json(alunos);
+            const { page, limit } = req.query;
+
+            if (!page && !limit) {
+            // sem parâmetros de paginação: mantém o comportamento antigo,
+            // devolve a lista inteira. Preserva compatibilidade com quem
+            // ainda chama /alunos sem paginar (ex: front atual)
+                const alunos = await connection('alunos').select(colunas).orderBy('nome');
+                return res.json(alunos);
+            }
+
+            const paginaAtual = Math.max(parseInt(page, 10) || 1, 1);
+            const porPagina = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+            // limite de 100 por página, pra ninguém pedir uma página absurda
+            // e sobrecarregar o banco/servidor de propósito ou por engano
+            const offset = (paginaAtual - 1) * porPagina;
+
+            const [{ total }] = await connection('alunos').count('id as total');
+
+            const alunos = await connection('alunos')
+                .select(colunas)
+                .orderBy('nome')
+                .limit(porPagina)
+                .offset(offset);
+
+            return res.json({
+                data: alunos,
+                pagina: paginaAtual,
+                totalPaginas: Math.ceil(total / porPagina),
+                totalRegistros: Number(total)
+            });
 
         } catch (error) {
             console.error(error);

@@ -31,15 +31,18 @@ module.exports = {
             }
 
             if (!usuario) {
-            // se não encontrou o email em nenhuma das três tabelas
-                return res.status(400).json({ error: 'Usuário não encontrado.' });
+            // se não encontrou o email em nenhuma das três tabelas — mensagem
+            // igual à de senha errada de propósito, pra não dar pista de
+            // quais e-mails estão cadastrados no sistema
+                return res.status(400).json({ error: 'Login não cadastrado.' });
             }
 
             const senhaValida = await bcrypt.compare(senha, usuario.senha);
             // compara a senha enviada com a senha criptografada salva no banco
 
             if (!senhaValida) {
-                return res.status(400).json({ error: 'Senha inválida.' });
+            // mesma mensagem do caso acima, mesmo motivo
+                return res.status(400).json({ error: 'Login não cadastrado.' });
             }
 
             const token = jwt.sign(

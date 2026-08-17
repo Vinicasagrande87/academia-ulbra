@@ -14,11 +14,36 @@ module.exports = {
                 return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode listar professores.' });
             }
 
-            const professores = await connection('professores')
-                .select('id', 'nome', 'email', 'cref', 'especialidade');
+            const colunas = ['id', 'nome', 'email', 'cref', 'especialidade'];
             // não retorna a senha, por segurança
 
-            return res.json(professores);
+            const { page, limit } = req.query;
+
+            if (!page && !limit) {
+            // sem parâmetros de paginação: mantém o comportamento antigo,
+            // devolve a lista inteira
+                const professores = await connection('professores').select(colunas).orderBy('nome');
+                return res.json(professores);
+            }
+
+            const paginaAtual = Math.max(parseInt(page, 10) || 1, 1);
+            const porPagina = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+            const offset = (paginaAtual - 1) * porPagina;
+
+            const [{ total }] = await connection('professores').count('id as total');
+
+            const professores = await connection('professores')
+                .select(colunas)
+                .orderBy('nome')
+                .limit(porPagina)
+                .offset(offset);
+
+            return res.json({
+                data: professores,
+                pagina: paginaAtual,
+                totalPaginas: Math.ceil(total / porPagina),
+                totalRegistros: Number(total)
+            });
 
         } catch (error) {
             console.error(error);
@@ -37,7 +62,8 @@ module.exports = {
 
             const { nome, email, senha, cref, especialidade } = req.body;
 
-            const senhaCriptografada = await bcrypt.hash(senha, 8);
+            const senhaCriptografada = await bcrypt.hash(senha, 10);
+            // custo 10 (era 8): padrão mais recomendado atualmente, ainda roda rápido
 
             const [{ id }] = await connection('professores').insert({
                 nome,

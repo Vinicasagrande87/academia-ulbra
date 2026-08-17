@@ -43,10 +43,33 @@ module.exports = {
     // lista todos os exercícios do catálogo
     // usado pelo professor pra escolher o que vai entrar no treino do aluno
         try {
-            const exercicios = await connection('exercicios').select('*');
-            // busca todos os exercícios cadastrados
+            const { page, limit } = req.query;
 
-            return res.json(exercicios);
+            if (!page && !limit) {
+            // sem parâmetros de paginação: mantém o comportamento antigo,
+            // devolve a lista inteira
+                const exercicios = await connection('exercicios').select('*').orderBy('nome');
+                return res.json(exercicios);
+            }
+
+            const paginaAtual = Math.max(parseInt(page, 10) || 1, 1);
+            const porPagina = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+            const offset = (paginaAtual - 1) * porPagina;
+
+            const [{ total }] = await connection('exercicios').count('id as total');
+
+            const exercicios = await connection('exercicios')
+                .select('*')
+                .orderBy('nome')
+                .limit(porPagina)
+                .offset(offset);
+
+            return res.json({
+                data: exercicios,
+                pagina: paginaAtual,
+                totalPaginas: Math.ceil(total / porPagina),
+                totalRegistros: Number(total)
+            });
 
         } catch (error) {
             console.error(error);

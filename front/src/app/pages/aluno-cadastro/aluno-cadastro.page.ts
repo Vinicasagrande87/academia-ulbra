@@ -57,7 +57,9 @@ export class AlunoCadastroPage {
           color: 'success'
         });
         await toast.present();
-        this.router.navigate(['/alunos-lista']);
+        // volta pro menu principal (home-admin ou home-professor, conforme
+        // quem está logado) em vez de ir pra lista de alunos
+        this.router.navigate([this.voltarPara]);
       },
       error: async (err) => {
         console.error('Erro ao cadastrar aluno:', err);
