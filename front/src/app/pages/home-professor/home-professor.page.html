@@ -40,17 +40,6 @@
         </ion-card>
       </ion-col>
 
-      <!-- Cadastrar Exercícios -->
-      <ion-col size="12" size-md="6">
-        <ion-card routerLink="/exercicio-cadastro" class="menu-card">
-          <ion-card-content class="ion-text-center">
-            <ion-icon name="fitness-outline" size="large" color="tertiary"></ion-icon>
-            <ion-card-title>Cadastrar Exercícios</ion-card-title>
-            <p>Adicionar exercícios e vídeos explicativos</p>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
       <!-- Planos e Pagamentos -->
       <ion-col size="12" size-md="6">
         <ion-card routerLink="/financeiro" class="menu-card">
@@ -68,11 +57,24 @@
   <div *ngIf="isAdmin">
     <div class="welcome-banner ion-margin-top">
       <h2>Administração</h2>
-      <p>Gerenciamento de professores e da vitrine de planos.</p>
+      <p>Gerenciamento de professores, exercícios e da vitrine de planos.</p>
     </div>
 
     <ion-grid>
       <ion-row>
+        <!-- Cadastrar Exercícios -->
+        <!-- movido pra cá: o backend (exerciciocontroller.create) só libera
+             admin, então professor não deve nem ver esse card -->
+        <ion-col size="12" size-md="6">
+          <ion-card routerLink="/exercicio-cadastro" class="menu-card">
+            <ion-card-content class="ion-text-center">
+              <ion-icon name="fitness-outline" size="large" color="tertiary"></ion-icon>
+              <ion-card-title>Cadastrar Exercícios</ion-card-title>
+              <p>Adicionar exercícios e vídeos explicativos</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
         <!-- Cadastrar Professor -->
         <ion-col size="12" size-md="6">
           <ion-card routerLink="/professor-cadastro" class="menu-card">

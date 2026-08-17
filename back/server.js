@@ -50,13 +50,26 @@ const loginLimiter = rateLimit({
     message: { error: 'Muitas tentativas de login. Tente novamente mais tarde.' }
 });
 
-// app.use('/login', loginLimiter);
-// DESATIVADO TEMPORARIAMENTE para facilitar os testes de login em desenvolvimento
+// reativado: só fica DESLIGADO quando NODE_ENV é "development" (rodando
+// local com "node server.js" / "npm run dev"), pra não atrapalhar seus
+// testes manuais de login. Em produção (Vercel seta NODE_ENV=production
+// automaticamente) o limite fica sempre ativo.
+if (process.env.NODE_ENV !== 'development') {
+    app.use('/login', loginLimiter);
+}
 
 app.use(routes);
 // aqui pus com o comando app.use(routes), as funcionalidade da ferramenta Router para
 // rodar a resposta de quando meu servidor estiver online e tambem para usar futuramenta
 //para meu arquivo de rotas
+
+// handler de erro global — pega qualquer erro que escape dos try/catch dos
+// controllers (ex: o erro de CORS lançado no callback acima) e responde de
+// forma padronizada, sem vazar stack trace pro cliente
+app.use((err, req, res, next) => {
+    console.error(err);
+    return res.status(err.status || 500).json({ error: err.message || 'Erro interno no servidor.' });
+});
 
 if (require.main === module) {
     // só sobe o servidor "tradicional" (app.listen) quando este arquivo é
