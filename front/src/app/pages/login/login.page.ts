@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { NotificationService } from '../../services/notification';
 
 @Component({
   selector: 'app-login',
@@ -21,33 +22,17 @@ export class LoginPage {
 
   carregando = false;
 
-  // mensagem exibida direto na tela, sem depender do ToastController do
-  // Ionic (que está apresentando um bug de não renderizar nesse projeto/
-  // ambiente de build — o overlay é criado mas nunca aparece visualmente,
-  // sem lançar nenhum erro capturável). Essa abordagem usa só binding
-  // normal do Angular, sem overlay nenhum, então é garantido que funciona.
-  mensagem: { texto: string; tipo: 'success' | 'danger' } | null = null;
-  private timeoutMensagem: any;
-
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notification: NotificationService
   ) {}
-
-  private mostrarMensagem(texto: string, tipo: 'success' | 'danger') {
-    clearTimeout(this.timeoutMensagem);
-    this.mensagem = { texto, tipo };
-    this.timeoutMensagem = setTimeout(() => {
-      this.mensagem = null;
-    }, 3000);
-  }
 
   fazerLogin() {
     if (this.carregando) {
       return;
     }
     this.carregando = true;
-    this.mensagem = null;
 
     this.authService.login(this.credentials).subscribe({
       next: (res: any) => {
@@ -70,7 +55,7 @@ export class LoginPage {
       error: (err) => {
         this.carregando = false;
         console.error('Erro ao fazer login:', err);
-        this.mostrarMensagem(err.error?.error || 'E-mail ou senha inválidos.', 'danger');
+        this.notification.erro(err.error?.error || 'E-mail ou senha inválidos.');
       }
     });
   }

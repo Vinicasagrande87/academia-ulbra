@@ -8,6 +8,7 @@ import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
 // ajuste o caminho conforme a pasta real onde o auth.ts está no seu projeto
+import { NotificationService } from '../../services/notification';
 
 @Component({
   selector: 'app-aluno-cadastro',
@@ -32,15 +33,11 @@ export class AlunoCadastroPage {
 
   voltarPara: string = '/home-professor';
 
-  // mensagem exibida direto na tela, sem depender do ToastController do
-  // Ionic — ver explicação detalhada em login.page.ts
-  mensagem: { texto: string; tipo: 'success' | 'danger' } | null = null;
-  private timeoutMensagem: any;
-
   constructor(
     private http: HttpClient,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private notification: NotificationService
   ) {}
 
   ionViewWillEnter() {
@@ -51,28 +48,18 @@ export class AlunoCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
-  private mostrarMensagem(texto: string, tipo: 'success' | 'danger') {
-    clearTimeout(this.timeoutMensagem);
-    this.mensagem = { texto, tipo };
-    this.timeoutMensagem = setTimeout(() => {
-      this.mensagem = null;
-    }, 2500);
-  }
-
   cadastrarAluno() {
     // o token é anexado automaticamente pelo authInterceptor
-    this.mensagem = null;
     this.http.post(`${environment.apiUrl}/alunos`, this.aluno).subscribe({
       next: () => {
-        this.mostrarMensagem('Aluno cadastrado com sucesso!', 'success');
-        // aguarda um instante pra pessoa ver a mensagem antes de navegar
+        this.notification.sucesso('Aluno cadastrado com sucesso!');
         setTimeout(() => {
           this.router.navigate([this.voltarPara]);
-        }, 1200);
+        }, 900);
       },
       error: (err) => {
         console.error('Erro ao cadastrar aluno:', err);
-        this.mostrarMensagem(err.error?.error || 'Erro ao cadastrar aluno.', 'danger');
+        this.notification.erro(err.error?.error || 'Erro ao cadastrar aluno.');
       }
     });
   }
