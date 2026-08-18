@@ -1,7 +1,7 @@
-import { Component, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -32,15 +32,15 @@ export class AlunoCadastroPage {
 
   voltarPara: string = '/home-professor';
 
+  // mensagem exibida direto na tela, sem depender do ToastController do
+  // Ionic — ver explicação detalhada em login.page.ts
+  mensagem: { texto: string; tipo: 'success' | 'danger' } | null = null;
+  private timeoutMensagem: any;
+
   constructor(
     private http: HttpClient,
-    private toastController: ToastController,
     private router: Router,
-    private authService: AuthService,
-    private ngZone: NgZone
-    // necessário pro toast aparecer de forma confiável — ver comentário
-    // detalhado em login.page.ts sobre o motivo (bug do builder esbuild
-    // com async/await dentro do callback de subscribe)
+    private authService: AuthService
   ) {}
 
   ionViewWillEnter() {
@@ -51,32 +51,28 @@ export class AlunoCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
+  private mostrarMensagem(texto: string, tipo: 'success' | 'danger') {
+    clearTimeout(this.timeoutMensagem);
+    this.mensagem = { texto, tipo };
+    this.timeoutMensagem = setTimeout(() => {
+      this.mensagem = null;
+    }, 2500);
+  }
+
   cadastrarAluno() {
     // o token é anexado automaticamente pelo authInterceptor
+    this.mensagem = null;
     this.http.post(`${environment.apiUrl}/alunos`, this.aluno).subscribe({
       next: () => {
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: 'Aluno cadastrado com sucesso!',
-            duration: 2000,
-            color: 'success'
-          });
-          await toast.present();
-          // volta pro menu principal (home-admin ou home-professor, conforme
-          // quem está logado) em vez de ir pra lista de alunos
+        this.mostrarMensagem('Aluno cadastrado com sucesso!', 'success');
+        // aguarda um instante pra pessoa ver a mensagem antes de navegar
+        setTimeout(() => {
           this.router.navigate([this.voltarPara]);
-        });
+        }, 1200);
       },
       error: (err) => {
         console.error('Erro ao cadastrar aluno:', err);
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: err.error?.error || 'Erro ao cadastrar aluno.',
-            duration: 2500,
-            color: 'danger'
-          });
-          await toast.present();
-        });
+        this.mostrarMensagem(err.error?.error || 'Erro ao cadastrar aluno.', 'danger');
       }
     });
   }

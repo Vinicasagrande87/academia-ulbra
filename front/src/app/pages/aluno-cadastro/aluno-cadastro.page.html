@@ -8,6 +8,13 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <div
+    *ngIf="mensagem"
+    [style.background]="mensagem.tipo === 'success' ? '#2dd36f' : '#eb445a'"
+    style="color: white; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; text-align: center; font-weight: 500;">
+    {{ mensagem.texto }}
+  </div>
+
   <form #alunoForm="ngForm" (ngSubmit)="cadastrarAluno()">
     <ion-item>
       <ion-input

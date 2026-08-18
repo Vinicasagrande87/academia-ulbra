@@ -1,7 +1,7 @@
-import { Component, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -21,23 +21,33 @@ export class LoginPage {
 
   carregando = false;
 
+  // mensagem exibida direto na tela, sem depender do ToastController do
+  // Ionic (que está apresentando um bug de não renderizar nesse projeto/
+  // ambiente de build — o overlay é criado mas nunca aparece visualmente,
+  // sem lançar nenhum erro capturável). Essa abordagem usa só binding
+  // normal do Angular, sem overlay nenhum, então é garantido que funciona.
+  mensagem: { texto: string; tipo: 'success' | 'danger' } | null = null;
+  private timeoutMensagem: any;
+
   constructor(
     private authService: AuthService,
-    private toastController: ToastController,
-    private router: Router,
-    private ngZone: NgZone
-    // NgZone é necessário aqui por causa de um problema conhecido do builder
-    // esbuild do Angular: código async/await dentro do callback de erro de
-    // um subscribe() às vezes roda fora da "zone" do Angular, então o toast
-    // é criado no DOM mas a tela não é avisada pra mostrar ele. Envolvendo
-    // com ngZone.run() garantimos que o Angular saiba da mudança e renderize.
+    private router: Router
   ) {}
+
+  private mostrarMensagem(texto: string, tipo: 'success' | 'danger') {
+    clearTimeout(this.timeoutMensagem);
+    this.mensagem = { texto, tipo };
+    this.timeoutMensagem = setTimeout(() => {
+      this.mensagem = null;
+    }, 3000);
+  }
 
   fazerLogin() {
     if (this.carregando) {
       return;
     }
     this.carregando = true;
+    this.mensagem = null;
 
     this.authService.login(this.credentials).subscribe({
       next: (res: any) => {
@@ -60,17 +70,7 @@ export class LoginPage {
       error: (err) => {
         this.carregando = false;
         console.error('Erro ao fazer login:', err);
-
-        // roda a criação/exibição do toast explicitamente dentro da zone
-        // do Angular, garantindo que a tela seja atualizada
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: err.error?.error || 'E-mail ou senha inválidos.',
-            duration: 2500,
-            color: 'danger'
-          });
-          await toast.present();
-        });
+        this.mostrarMensagem(err.error?.error || 'E-mail ou senha inválidos.', 'danger');
       }
     });
   }
