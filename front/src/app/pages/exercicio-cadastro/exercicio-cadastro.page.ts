@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
@@ -35,10 +35,7 @@ export class ExercicioCadastroPage {
     private http: HttpClient,
     private toastController: ToastController,
     private router: Router,
-    private authService: AuthService,
-    private ngZone: NgZone
-    // necessário pro toast aparecer de forma confiável — ver comentário
-    // detalhado em login.page.ts sobre o motivo
+    private authService: AuthService
   ) {}
 
   ionViewWillEnter() {
@@ -49,30 +46,26 @@ export class ExercicioCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
-  cadastrarExercicio() {
+  async cadastrarExercicio() {
     // o token é anexado automaticamente pelo authInterceptor
     this.http.post(`${environment.apiUrl}/exercicios`, this.exercicio).subscribe({
-      next: () => {
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: 'Exercício cadastrado com sucesso!',
-            duration: 2000,
-            color: 'success'
-          });
-          await toast.present();
-          this.router.navigate([this.voltarPara]);
+      next: async () => {
+        const toast = await this.toastController.create({
+          message: 'Exercício cadastrado com sucesso!',
+          duration: 2000,
+          color: 'success'
         });
+        await toast.present();
+        this.router.navigate([this.voltarPara]);
       },
-      error: (err) => {
+      error: async (err) => {
         console.error('Erro ao cadastrar exercício:', err);
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: err.error?.error || 'Erro ao cadastrar exercício.',
-            duration: 2500,
-            color: 'danger'
-          });
-          await toast.present();
+        const toast = await this.toastController.create({
+          message: err.error?.error || 'Erro ao cadastrar exercício.',
+          duration: 2500,
+          color: 'danger'
         });
+        await toast.present();
       }
     });
   }

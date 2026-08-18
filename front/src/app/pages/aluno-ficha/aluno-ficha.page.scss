@@ -7,3 +7,9 @@ ion-item a {
   color: var(--ion-color-primary);
   font-size: 0.85rem;
 }
+
+.cabecalho-treino {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

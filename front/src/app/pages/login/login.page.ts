@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
-import { NotificationService } from '../../services/notification';
 
 @Component({
   selector: 'app-login',
@@ -24,8 +23,8 @@ export class LoginPage {
 
   constructor(
     private authService: AuthService,
-    private router: Router,
-    private notification: NotificationService
+    private toastController: ToastController,
+    private router: Router
   ) {}
 
   fazerLogin() {
@@ -52,10 +51,15 @@ export class LoginPage {
           this.carregando = false;
         });
       },
-      error: (err) => {
+      error: async (err) => {
         this.carregando = false;
         console.error('Erro ao fazer login:', err);
-        this.notification.erro(err.error?.error || 'E-mail ou senha inválidos.');
+        const toast = await this.toastController.create({
+          message: err.error?.error || 'Login não cadastrado.',
+          duration: 2500,
+          color: 'danger'
+        });
+        await toast.present();
       }
     });
   }

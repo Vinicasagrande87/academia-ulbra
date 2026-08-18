@@ -1,12 +1,12 @@
 .welcome-banner {
   text-align: center;
   margin-bottom: 20px;
-  
+
   h2 {
     font-weight: bold;
     color: var(--ion-color-primary);
   }
-  
+
   p {
     color: var(--ion-color-step-600, #666);
   }
@@ -38,4 +38,8 @@
     color: #666;
     margin: 0;
   }
+}
+
+.icone-sair {
+  margin-right: 5px;
 }

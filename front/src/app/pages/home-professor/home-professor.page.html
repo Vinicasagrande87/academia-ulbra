@@ -3,7 +3,7 @@
     <ion-title>{{ isAdmin ? 'Painel do Admin' : 'Painel do Professor' }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="logout()" color="light">
-        <ion-icon name="log-out-outline" style="margin-right: 5px;"></ion-icon>
+        <ion-icon name="log-out-outline" class="icone-sair"></ion-icon>
         SAIR
       </ion-button>
     </ion-buttons>
@@ -63,8 +63,8 @@
     <ion-grid>
       <ion-row>
         <!-- Cadastrar Exercícios -->
-        <!-- movido pra cá: o backend (exerciciocontroller.create) só libera
-             admin, então professor não deve nem ver esse card -->
+        <!-- fica aqui, na seção exclusiva de admin: o backend
+             (exerciciocontroller.create) só libera admin -->
         <ion-col size="12" size-md="6">
           <ion-card routerLink="/exercicio-cadastro" class="menu-card">
             <ion-card-content class="ion-text-center">

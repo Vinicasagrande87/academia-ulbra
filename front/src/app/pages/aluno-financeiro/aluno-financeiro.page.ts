@@ -1,4 +1,4 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
@@ -28,10 +28,7 @@ export class AlunoFinanceiroPage implements OnInit {
   constructor(
     private http: HttpClient,
     private alertController: AlertController,
-    private toastController: ToastController,
-    private ngZone: NgZone
-    // necessário pro toast aparecer de forma confiável — ver comentário
-    // detalhado em login.page.ts sobre o motivo
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {
@@ -94,27 +91,23 @@ export class AlunoFinanceiroPage implements OnInit {
       plano_id: plano.id,
       forma_pagamento: formaPagamento
     }).subscribe({
-      next: () => {
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: 'Solicitação enviada! Aguarde a confirmação na recepção.',
-            duration: 3000,
-            color: 'success'
-          });
-          await toast.present();
-          this.carregarPagamentos();
+      next: async () => {
+        const toast = await this.toastController.create({
+          message: 'Solicitação enviada! Aguarde a confirmação na recepção.',
+          duration: 3000,
+          color: 'success'
         });
+        await toast.present();
+        this.carregarPagamentos();
       },
-      error: (err) => {
+      error: async (err) => {
         console.error('Erro ao enviar solicitação:', err);
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: err.error?.error || 'Erro ao enviar solicitação.',
-            duration: 2500,
-            color: 'danger'
-          });
-          await toast.present();
+        const toast = await this.toastController.create({
+          message: err.error?.error || 'Erro ao enviar solicitação.',
+          duration: 2500,
+          color: 'danger'
         });
+        await toast.present();
       }
     });
   }

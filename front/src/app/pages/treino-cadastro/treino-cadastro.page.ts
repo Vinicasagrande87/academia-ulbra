@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
@@ -28,10 +28,7 @@ export class TreinoCadastroPage {
     private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router,
-    private toastController: ToastController,
-    private ngZone: NgZone
-    // necessário pro toast aparecer de forma confiável — ver comentário
-    // detalhado em login.page.ts sobre o motivo
+    private toastController: ToastController
   ) {}
 
   ionViewWillEnter() {
@@ -66,7 +63,7 @@ export class TreinoCadastroPage {
     this.itens.splice(index, 1);
   }
 
-  salvarTreino() {
+  async salvarTreino() {
     const treino = {
       aluno_id: Number(this.alunoId),
       dia_semana: this.diaSemana,
@@ -81,27 +78,23 @@ export class TreinoCadastroPage {
     };
 
     this.http.post(`${environment.apiUrl}/treinos`, treino).subscribe({
-      next: () => {
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: 'Treino montado com sucesso!',
-            duration: 2000,
-            color: 'success'
-          });
-          await toast.present();
-          this.router.navigate(['/aluno-ficha', this.alunoId]);
+      next: async () => {
+        const toast = await this.toastController.create({
+          message: 'Treino montado com sucesso!',
+          duration: 2000,
+          color: 'success'
         });
+        await toast.present();
+        this.router.navigate(['/aluno-ficha', this.alunoId]);
       },
-      error: (err) => {
+      error: async (err) => {
         console.error('Erro ao salvar treino:', err);
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: err.error?.error || 'Erro ao montar treino.',
-            duration: 2500,
-            color: 'danger'
-          });
-          await toast.present();
+        const toast = await this.toastController.create({
+          message: err.error?.error || 'Erro ao montar treino.',
+          duration: 2500,
+          color: 'danger'
         });
+        await toast.present();
       }
     });
   }

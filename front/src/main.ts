@@ -3,16 +3,6 @@ import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } 
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
-// IMPORTANTE: importa IonToast e IonAlert aqui, mesmo sem usar diretamente
-// nesse arquivo. Esses componentes só são criados via código (ToastController
-// e AlertController), nunca aparecem escritos em nenhum .html — por isso o
-// Angular/esbuild não sabe que precisa incluí-los no pacote principal, e o
-// carregamento dinâmico que o Ionic faz em tempo de execução falha
-// silenciosamente em produção (sem lançar nenhum erro capturável), fazendo
-// o toast/alert nunca aparecer. Importando aqui, garantimos que eles fiquem
-// registrados desde o início do app.
-import { IonToast, IonAlert } from '@ionic/angular/standalone';
-
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { authInterceptor } from './app/services/auth.interceptor';

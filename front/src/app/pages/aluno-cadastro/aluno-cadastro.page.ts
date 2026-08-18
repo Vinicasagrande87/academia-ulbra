@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
 // ajuste o caminho conforme a pasta real onde o auth.ts está no seu projeto
-import { NotificationService } from '../../services/notification';
 
 @Component({
   selector: 'app-aluno-cadastro',
@@ -35,9 +34,9 @@ export class AlunoCadastroPage {
 
   constructor(
     private http: HttpClient,
+    private toastController: ToastController,
     private router: Router,
-    private authService: AuthService,
-    private notification: NotificationService
+    private authService: AuthService
   ) {}
 
   ionViewWillEnter() {
@@ -48,18 +47,28 @@ export class AlunoCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
-  cadastrarAluno() {
+  async cadastrarAluno() {
     // o token é anexado automaticamente pelo authInterceptor
     this.http.post(`${environment.apiUrl}/alunos`, this.aluno).subscribe({
-      next: () => {
-        this.notification.sucesso('Aluno cadastrado com sucesso!');
-        setTimeout(() => {
-          this.router.navigate([this.voltarPara]);
-        }, 900);
+      next: async () => {
+        const toast = await this.toastController.create({
+          message: 'Aluno cadastrado com sucesso!',
+          duration: 2000,
+          color: 'success'
+        });
+        await toast.present();
+        // volta pro menu principal (home-admin ou home-professor, conforme
+        // quem está logado) em vez de ir pra lista de alunos
+        this.router.navigate([this.voltarPara]);
       },
-      error: (err) => {
+      error: async (err) => {
         console.error('Erro ao cadastrar aluno:', err);
-        this.notification.erro(err.error?.error || 'Erro ao cadastrar aluno.');
+        const toast = await this.toastController.create({
+          message: err.error?.error || 'Erro ao cadastrar aluno.',
+          duration: 2500,
+          color: 'danger'
+        });
+        await toast.present();
       }
     });
   }
