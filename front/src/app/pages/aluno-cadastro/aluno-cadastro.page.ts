@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
@@ -34,41 +34,27 @@ export class AlunoCadastroPage {
 
   constructor(
     private http: HttpClient,
-    private toastController: ToastController,
-    private router: Router,
     private authService: AuthService
   ) {}
 
   ionViewWillEnter() {
-    // recalcula toda vez que a página fica visível — o Ionic pode reaproveitar
-    // esta instância entre navegações (IonicRouteStrategy), então isso evita
-    // que o valor fique "preso" de um login anterior na mesma aba
     const usuario = this.authService.getUser();
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
-  async cadastrarAluno() {
-    // o token é anexado automaticamente pelo authInterceptor
+  cadastrarAluno() {
     this.http.post(`${environment.apiUrl}/alunos`, this.aluno).subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: 'Aluno cadastrado com sucesso!',
-          duration: 2000,
-          color: 'success'
-        });
-        await toast.present();
-        // volta pro menu principal (home-admin ou home-professor, conforme
-        // quem está logado) em vez de ir pra lista de alunos
-        this.router.navigate([this.voltarPara]);
+      next: () => {
+        // window.location.href é um comando puro do navegador — não passa
+        // por Angular Router, Zone.js, ToastController ou nenhuma outra
+        // camada do framework. É o jeito mais direto e garantido de sair
+        // desta tela depois do cadastro. Recarrega a página de destino,
+        // mas isso não é problema nenhum aqui.
+        window.location.href = this.voltarPara;
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao cadastrar aluno:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao cadastrar aluno.',
-          duration: 2500,
-          color: 'danger'
-        });
-        await toast.present();
+        window.alert(err.error?.error || 'Erro ao cadastrar aluno.');
       }
     });
   }
