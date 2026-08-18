@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
@@ -24,7 +24,13 @@ export class LoginPage {
   constructor(
     private authService: AuthService,
     private toastController: ToastController,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
+    // NgZone é necessário aqui por causa de um problema conhecido do builder
+    // esbuild do Angular: código async/await dentro do callback de erro de
+    // um subscribe() às vezes roda fora da "zone" do Angular, então o toast
+    // é criado no DOM mas a tela não é avisada pra mostrar ele. Envolvendo
+    // com ngZone.run() garantimos que o Angular saiba da mudança e renderize.
   ) {}
 
   fazerLogin() {
@@ -51,16 +57,20 @@ export class LoginPage {
           this.carregando = false;
         });
       },
-      error: async (err) => {
+      error: (err) => {
         this.carregando = false;
-
         console.error('Erro ao fazer login:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'E-mail ou senha inválidos.',
-          duration: 2500,
-          color: 'danger'
+
+        // roda a criação/exibição do toast explicitamente dentro da zone
+        // do Angular, garantindo que a tela seja atualizada
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: err.error?.error || 'E-mail ou senha inválidos.',
+            duration: 2500,
+            color: 'danger'
+          });
+          await toast.present();
         });
-        await toast.present();
       }
     });
   }

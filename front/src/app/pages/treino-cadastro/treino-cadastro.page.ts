@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
@@ -28,7 +28,10 @@ export class TreinoCadastroPage {
     private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private ngZone: NgZone
+    // necessário pro toast aparecer de forma confiável — ver comentário
+    // detalhado em login.page.ts sobre o motivo
   ) {}
 
   ionViewWillEnter() {
@@ -63,36 +66,42 @@ export class TreinoCadastroPage {
     this.itens.splice(index, 1);
   }
 
-  async salvarTreino() {
+  salvarTreino() {
     const treino = {
       aluno_id: Number(this.alunoId),
       dia_semana: this.diaSemana,
       exercicios: this.itens.map((item, i) => ({
         exercicio_id: item.exercicio_id,
-        carga: item.carga,
+        carga: item.carga ? parseInt(String(item.carga).replace(/\D/g, ''), 10) : null,
+        // extrai só os dígitos, então "40kg" também funciona, e trata vazio como null
         repeticoes: item.repeticoes,
+        // esse continua texto mesmo, "3x12" é válido no banco (migration já trata isso)
         ordem: i + 1
       }))
     };
 
     this.http.post(`${environment.apiUrl}/treinos`, treino).subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: 'Treino montado com sucesso!',
-          duration: 2000,
-          color: 'success'
+      next: () => {
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: 'Treino montado com sucesso!',
+            duration: 2000,
+            color: 'success'
+          });
+          await toast.present();
+          this.router.navigate(['/aluno-ficha', this.alunoId]);
         });
-        await toast.present();
-        this.router.navigate(['/aluno-ficha', this.alunoId]);
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao salvar treino:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao montar treino.',
-          duration: 2500,
-          color: 'danger'
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: err.error?.error || 'Erro ao montar treino.',
+            duration: 2500,
+            color: 'danger'
+          });
+          await toast.present();
         });
-        await toast.present();
       }
     });
   }

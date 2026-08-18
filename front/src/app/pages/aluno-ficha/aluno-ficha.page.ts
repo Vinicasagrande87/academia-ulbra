@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
@@ -30,7 +30,10 @@ export class AlunoFichaPage implements OnInit {
     private http: HttpClient,
     private route: ActivatedRoute,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private ngZone: NgZone
+    // necessário pro toast aparecer de forma confiável — ver comentário
+    // detalhado em login.page.ts sobre o motivo
   ) {}
 
   ngOnInit() {
@@ -99,24 +102,27 @@ export class AlunoFichaPage implements OnInit {
 
   private confirmarExclusao(treino: any) {
     this.http.delete(`${environment.apiUrl}/treinos/${treino.id}`).subscribe({
-      next: async () => {
+      next: () => {
         this.treinos = this.treinos.filter(t => t.id !== treino.id);
-
-        const toast = await this.toastController.create({
-          message: 'Treino excluído com sucesso!',
-          duration: 2000,
-          color: 'success'
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: 'Treino excluído com sucesso!',
+            duration: 2000,
+            color: 'success'
+          });
+          await toast.present();
         });
-        await toast.present();
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao excluir treino:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao excluir treino.',
-          duration: 2500,
-          color: 'danger'
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: err.error?.error || 'Erro ao excluir treino.',
+            duration: 2500,
+            color: 'danger'
+          });
+          await toast.present();
         });
-        await toast.present();
       }
     });
   }

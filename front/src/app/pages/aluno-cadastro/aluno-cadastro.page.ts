@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
@@ -36,7 +36,11 @@ export class AlunoCadastroPage {
     private http: HttpClient,
     private toastController: ToastController,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private ngZone: NgZone
+    // necessário pro toast aparecer de forma confiável — ver comentário
+    // detalhado em login.page.ts sobre o motivo (bug do builder esbuild
+    // com async/await dentro do callback de subscribe)
   ) {}
 
   ionViewWillEnter() {
@@ -47,28 +51,32 @@ export class AlunoCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
-  async cadastrarAluno() {
+  cadastrarAluno() {
     // o token é anexado automaticamente pelo authInterceptor
     this.http.post(`${environment.apiUrl}/alunos`, this.aluno).subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: 'Aluno cadastrado com sucesso!',
-          duration: 2000,
-          color: 'success'
+      next: () => {
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: 'Aluno cadastrado com sucesso!',
+            duration: 2000,
+            color: 'success'
+          });
+          await toast.present();
+          // volta pro menu principal (home-admin ou home-professor, conforme
+          // quem está logado) em vez de ir pra lista de alunos
+          this.router.navigate([this.voltarPara]);
         });
-        await toast.present();
-        // volta pro menu principal (home-admin ou home-professor, conforme
-        // quem está logado) em vez de ir pra lista de alunos
-        this.router.navigate([this.voltarPara]);
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao cadastrar aluno:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao cadastrar aluno.',
-          duration: 2500,
-          color: 'danger'
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: err.error?.error || 'Erro ao cadastrar aluno.',
+            duration: 2500,
+            color: 'danger'
+          });
+          await toast.present();
         });
-        await toast.present();
       }
     });
   }

@@ -1,0 +1,10 @@
+[33m88d7b3e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m alterações no cadastro de professores
+[33m5822aa7[m mudando logi ts
+[33m3ed1dd8[m  ajustando page login
+[33mce1c48f[m fix: previne duplo clique no login
+[33m1c083b0[m Merge branch 'master' of https://github.com/Vinicasagrande87/academia-ulbra
+[33m7190902[m tentando ajustar
+[33me1af8f4[m Update build command for Vercel configuration
+[33m66eb377[m Change build command to use npx for Ionic build
+[33m624d2cc[m Adiciona configuração de build do front para Vercel e outros ajustes
+[33m5713c17[m Remove serverless-http, incompativel com o runtime do Vercel

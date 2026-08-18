@@ -46,6 +46,19 @@ module.exports = {
 
         } catch (error) {
             console.error(error);
+
+            if (error.code === '23505') {
+            // violação de UNIQUE no Postgres — email ou cpf já cadastrado.
+            // error.detail costuma vir tipo: 'Key (email)=(x@x.com) already exists.'
+                if (error.detail?.includes('email')) {
+                    return res.status(409).json({ error: 'Este e-mail já está cadastrado.' });
+                }
+                if (error.detail?.includes('cpf')) {
+                    return res.status(409).json({ error: 'Este CPF já está cadastrado.' });
+                }
+                return res.status(409).json({ error: 'Aluno já cadastrado com esses dados.' });
+            }
+
             return res.status(500).json({ error: 'Erro ao cadastrar aluno.' });
         }
     },
@@ -188,6 +201,17 @@ module.exports = {
 
         } catch (error) {
             console.error(error);
+
+            if (error.code === '23505') {
+                if (error.detail?.includes('email')) {
+                    return res.status(409).json({ error: 'Este e-mail já está em uso por outro cadastro.' });
+                }
+                if (error.detail?.includes('cpf')) {
+                    return res.status(409).json({ error: 'Este CPF já está em uso por outro cadastro.' });
+                }
+                return res.status(409).json({ error: 'Dados em conflito com outro cadastro existente.' });
+            }
+
             return res.status(500).json({ error: 'Erro ao atualizar.' });
         }
     },

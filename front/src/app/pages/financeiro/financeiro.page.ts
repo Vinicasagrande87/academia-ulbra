@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
@@ -36,7 +36,10 @@ export class FinanceiroPage implements OnInit {
     private http: HttpClient,
     private alertController: AlertController,
     private toastController: ToastController,
-    private authService: AuthService
+    private authService: AuthService,
+    private ngZone: NgZone
+    // necessário pro toast aparecer de forma confiável — ver comentário
+    // detalhado em login.page.ts sobre o motivo
   ) {
     const usuario = this.authService.getUser();
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
@@ -99,23 +102,27 @@ export class FinanceiroPage implements OnInit {
       forma_pagamento: pagamento.forma_pagamento,
       observacao
     }).subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: 'Pagamento confirmado!',
-          duration: 2000,
-          color: 'success'
+      next: () => {
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: 'Pagamento confirmado!',
+            duration: 2000,
+            color: 'success'
+          });
+          await toast.present();
+          this.carregarPagamentos();
         });
-        await toast.present();
-        this.carregarPagamentos();
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao confirmar pagamento:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao confirmar pagamento.',
-          duration: 2500,
-          color: 'danger'
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: err.error?.error || 'Erro ao confirmar pagamento.',
+            duration: 2500,
+            color: 'danger'
+          });
+          await toast.present();
         });
-        await toast.present();
       }
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -43,7 +43,10 @@ export class TreinoEditarPage implements OnInit {
     private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private ngZone: NgZone
+    // necessário pro toast aparecer de forma confiável — ver comentário
+    // detalhado em login.page.ts sobre o motivo
   ) {}
 
   ngOnInit() {
@@ -111,14 +114,16 @@ export class TreinoEditarPage implements OnInit {
     this.itens.splice(index, 1);
   }
 
-  async salvarEdicao() {
+  salvarEdicao() {
     if (!this.treinoId) {
-      const toast = await this.toastController.create({
-        message: 'Não foi possível identificar o treino a ser editado.',
-        duration: 2500,
-        color: 'danger'
+      this.ngZone.run(async () => {
+        const toast = await this.toastController.create({
+          message: 'Não foi possível identificar o treino a ser editado.',
+          duration: 2500,
+          color: 'danger'
+        });
+        await toast.present();
       });
-      await toast.present();
       return;
     }
 
@@ -126,30 +131,34 @@ export class TreinoEditarPage implements OnInit {
       dia_semana: this.dia,
       exercicios: this.itens.map((item, i) => ({
         exercicio_id: item.exercicio_id,
-        carga: item.carga,
+        carga: item.carga ? parseInt(String(item.carga).replace(/\D/g, ''), 10) : null,
         repeticoes: item.repeticoes,
         ordem: i + 1
       }))
     };
 
     this.http.put(`${environment.apiUrl}/treinos/${this.treinoId}`, treino).subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: 'Treino atualizado com sucesso!',
-          duration: 2000,
-          color: 'success'
+      next: () => {
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: 'Treino atualizado com sucesso!',
+            duration: 2000,
+            color: 'success'
+          });
+          await toast.present();
+          this.router.navigate(['/aluno-ficha', this.alunoId]);
         });
-        await toast.present();
-        this.router.navigate(['/aluno-ficha', this.alunoId]);
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao salvar edição:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao salvar alterações.',
-          duration: 2500,
-          color: 'danger'
+        this.ngZone.run(async () => {
+          const toast = await this.toastController.create({
+            message: err.error?.error || 'Erro ao salvar alterações.',
+            duration: 2500,
+            color: 'danger'
+          });
+          await toast.present();
         });
-        await toast.present();
       }
     });
   }
