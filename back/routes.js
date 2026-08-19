@@ -14,6 +14,8 @@ const treinoController = require('./controllers/treinocontroller');
 const loginController = require('./controllers/logincontroller');
 const planoController = require('./controllers/planocontroller');
 const pagamentoController = require('./controllers/pagamentocontroller');
+const workoutxController = require('./controllers/workoutxcontroller');
+// NOVO: integração com o catálogo de gifs do WorkoutX
 
 routes.get('/', (req, res) => {
     res.json({ mensagem: 'Servidor Funcionando..🚀' });
@@ -118,5 +120,12 @@ routes.post('/pagamentos', authMiddleware, validarCampos({
 routes.get('/pagamentos', authMiddleware, pagamentoController.index);
 routes.put('/pagamentos/:id', authMiddleware, pagamentoController.update);
 routes.delete('/pagamentos/:id', authMiddleware, pagamentoController.delete);
+
+// integração WorkoutX (catálogo de gifs de exercícios) — a chave de API
+// fica só no backend, nunca é exposta ao navegador
+routes.get('/workoutx/search', authMiddleware, workoutxController.search);
+// admin busca no catálogo do WorkoutX pelo nome, pra achar o gif certo
+routes.get('/workoutx/gif/:id', workoutxController.gif);
+// espelha o gif do WorkoutX sem expor a chave — usado direto no <img> do front
 
 module.exports = routes;
