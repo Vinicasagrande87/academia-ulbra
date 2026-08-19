@@ -25,6 +25,14 @@
       </ion-select>
     </ion-item>
 
+    <ion-button
+      *ngIf="isAdmin"
+      fill="clear"
+      size="small"
+      routerLink="/exercicios-lista">
+      Ver todos os exercícios cadastrados
+    </ion-button>
+
     <ng-container *ngIf="grupoSelecionado">
 
       <ion-item *ngIf="!modoNovo">
@@ -81,7 +89,6 @@
         </ion-input>
       </ion-item>
 
-      <!-- pré-visualização: confirma que o link colado é válido antes de salvar -->
       <app-youtube-embed
         *ngIf="(modoNovo || exercicioEditandoId) && exercicio.video_url"
         [url]="exercicio.video_url">

@@ -47,6 +47,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/exercicio-cadastro/exercicio-cadastro.page').then( m => m.ExercicioCadastroPage)
   },
   {
+    path: 'exercicios-lista',
+    loadComponent: () => import('./pages/exercicios-lista/exercicios-lista.page').then( m => m.ExerciciosListaPage)
+  },
+  {
     path: 'treino-editar/:alunoId/:dia',
     loadComponent: () => import('./pages/treino-editar/treino-editar.page').then( m => m.TreinoEditarPage)
   },

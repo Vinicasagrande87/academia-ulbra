@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/exercicio-cadastro"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Exercícios Cadastrados</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      [(ngModel)]="filtro"
+      placeholder="Buscar por nome ou grupo muscular"
+      debounce="300"
+      showClearButton="always">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list *ngIf="exerciciosFiltrados().length > 0; else semExercicios">
+    <ion-item *ngFor="let ex of exerciciosFiltrados()">
+      <ion-label>
+        <h2>{{ ex.nome }}</h2>
+        <p>{{ ex.grupo_muscular }}</p>
+      </ion-label>
+      <ion-button
+        *ngIf="isAdmin"
+        slot="end"
+        fill="outline"
+        size="small"
+        (click)="editar(ex)">
+        Editar
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semExercicios>
+    <div class="ion-text-center ion-padding">
+      <p *ngIf="exercicios.length === 0">Nenhum exercício cadastrado ainda.</p>
+      <p *ngIf="exercicios.length > 0">Nenhum exercício encontrado com esse termo.</p>
+    </div>
+  </ng-template>
+</ion-content>

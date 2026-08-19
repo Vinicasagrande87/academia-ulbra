@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth';
 import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
-// ajuste o caminho conforme onde o componente ficou salvo
 
 interface Exercicio {
   id: number;
@@ -45,7 +44,8 @@ export class ExercicioCadastroPage {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private route: ActivatedRoute
   ) {}
 
   ionViewWillEnter() {
@@ -57,9 +57,25 @@ export class ExercicioCadastroPage {
 
   carregarExercicios() {
     this.http.get<Exercicio[]>(`${environment.apiUrl}/exercicios`).subscribe({
-      next: (lista) => this.todosExercicios = lista,
+      next: (lista) => {
+        this.todosExercicios = lista;
+        this.aplicarPreSelecaoDaUrl();
+      },
       error: (err) => console.error('Erro ao carregar exercícios:', err)
     });
+  }
+
+  // se veio de "exercicios-lista" com ?grupo=X&exercicioId=Y, já abre
+  // direto no modo de edição desse exercício específico
+  private aplicarPreSelecaoDaUrl() {
+    const grupo = this.route.snapshot.queryParamMap.get('grupo');
+    const exercicioId = this.route.snapshot.queryParamMap.get('exercicioId');
+
+    if (grupo && exercicioId) {
+      this.grupoSelecionado = grupo;
+      this.exercicioSelecionadoNoSelect = exercicioId;
+      this.onExercicioSelecionado();
+    }
   }
 
   get exerciciosDoGrupo(): Exercicio[] {
