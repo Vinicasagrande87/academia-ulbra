@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
@@ -30,8 +30,6 @@ export class ProfessorCadastroPage {
 
   constructor(
     private http: HttpClient,
-    private toastController: ToastController,
-    private router: Router,
     private authService: AuthService
   ) {}
 
@@ -43,25 +41,17 @@ export class ProfessorCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
-  async cadastrarProfessor() {
+  cadastrarProfessor() {
     this.http.post(`${environment.apiUrl}/professores`, this.professor).subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: 'Professor cadastrado com sucesso!',
-          duration: 2000,
-          color: 'success'
-        });
-        await toast.present();
-        this.router.navigate(['/professores-lista']);
+      next: () => {
+        // window.location.href em vez de router.navigate: garante que a
+        // navegação aconteça de forma confiável após o cadastro, sem
+        // depender de nenhuma outra camada do framework
+        window.location.href = this.voltarPara;
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao cadastrar professor:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao cadastrar professor.',
-          duration: 2500,
-          color: 'danger'
-        });
-        await toast.present();
+        window.alert(err.error?.error || 'Erro ao cadastrar professor.');
       }
     });
   }
