@@ -5,9 +5,9 @@ import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
-// ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
-// ajuste o caminho conforme a pasta real onde o auth.ts está no seu projeto
+import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
+// ajuste o caminho conforme onde o componente ficou salvo
 
 interface Exercicio {
   id: number;
@@ -22,23 +22,15 @@ interface Exercicio {
   templateUrl: './exercicio-cadastro.page.html',
   styleUrls: ['./exercicio-cadastro.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RouterModule]
+  imports: [CommonModule, FormsModule, IonicModule, RouterModule, YoutubeEmbedComponent]
 })
 export class ExercicioCadastroPage {
 
   gruposMusculares = ['Peito', 'Costas', 'Ombro', 'Braço', 'Abdômen', 'Glúteo', 'Pernas'];
-
-  // catálogo completo, carregado do banco assim que a página abre
   todosExercicios: Exercicio[] = [];
-
   grupoSelecionado = '';
-
-  // valor especial no <ion-select> pra representar "quero cadastrar um novo"
   readonly OPCAO_NOVO = '__novo__';
   exercicioSelecionadoNoSelect: string = '';
-
-  // quando não-nulo, o formulário está editando esse exercício (PUT);
-  // quando nulo e a opção "novo" está ativa, está criando (POST)
   exercicioEditandoId: number | null = null;
 
   exercicio = {
@@ -57,8 +49,6 @@ export class ExercicioCadastroPage {
   ) {}
 
   ionViewWillEnter() {
-    // recalcula toda vez que a página fica visível — o Ionic pode reaproveitar
-    // esta instância entre navegações (IonicRouteStrategy)
     const usuario = this.authService.getUser();
     this.isAdmin = usuario?.tipo === 'admin';
     this.voltarPara = this.isAdmin ? '/home-admin' : '/home-professor';
@@ -112,8 +102,6 @@ export class ExercicioCadastroPage {
     };
   }
 
-  // checagem manual — não depende do form.valid do Angular, que já se
-  // mostrou pouco confiável nesse ambiente de build
   podeSalvar(): boolean {
     if (!this.grupoSelecionado) return false;
     const videoOk = this.exercicio.video_url.trim().length > 0;
@@ -123,13 +111,12 @@ export class ExercicioCadastroPage {
       return nomeOk && videoOk;
     }
 
-    // editando um exercício já existente
     return this.exercicioEditandoId !== null && videoOk;
   }
 
   salvar() {
     if (!this.podeSalvar()) {
-      return; // trava extra, além do [disabled] do botão
+      return;
     }
 
     const request = this.exercicioEditandoId
@@ -138,8 +125,6 @@ export class ExercicioCadastroPage {
 
     request.subscribe({
       next: () => {
-        // window.location.href em vez de router.navigate: garante que a
-        // navegação aconteça de forma confiável após salvar
         window.location.href = this.voltarPara;
       },
       error: (err) => {

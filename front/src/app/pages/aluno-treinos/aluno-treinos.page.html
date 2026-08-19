@@ -25,7 +25,19 @@
               <ion-label>
                 <h3>{{ ex.exercicio_nome }}</h3>
                 <p>Carga: {{ ex.carga }}kg • Repetições: {{ ex.repeticoes }}</p>
-                <a *ngIf="ex.video_url" [href]="ex.video_url" target="_blank">Ver vídeo do exercício</a>
+
+                <ion-button
+                  *ngIf="ex.video_url"
+                  fill="clear"
+                  size="small"
+                  (click)="toggleVideo(ex.exercicio_id)">
+                  {{ videoEstaAberto(ex.exercicio_id) ? 'Ocultar vídeo' : 'Ver vídeo do exercício' }}
+                </ion-button>
+
+                <app-youtube-embed
+                  *ngIf="ex.video_url && videoEstaAberto(ex.exercicio_id)"
+                  [url]="ex.video_url">
+                </app-youtube-embed>
               </ion-label>
             </ion-item>
           </ion-list>

@@ -4,13 +4,15 @@ import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
+import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
+// ajuste o caminho conforme onde o componente ficou salvo
 
 @Component({
   selector: 'app-aluno-treinos',
   templateUrl: './aluno-treinos.page.html',
   styleUrls: ['./aluno-treinos.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule]
+  imports: [CommonModule, IonicModule, YoutubeEmbedComponent]
 })
 export class AlunoTreinosPage implements OnInit {
 
@@ -19,6 +21,10 @@ export class AlunoTreinosPage implements OnInit {
   treinos: any[] = [];
   carregando = true;
 
+  // controla quais vídeos estão abertos, pra não carregar todos os iframes
+  // de uma vez (pesado se o treino tiver muitos exercícios)
+  videosAbertos = new Set<number>();
+
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
@@ -26,15 +32,11 @@ export class AlunoTreinosPage implements OnInit {
   }
 
   ionViewWillEnter() {
-    // recarrega toda vez que a página fica visível, caso o professor tenha
-    // atualizado algo desde a última vez que o aluno olhou
     this.carregarTreinos();
   }
 
   carregarTreinos() {
     this.carregando = true;
-    // o token é anexado automaticamente pelo authInterceptor; o backend já
-    // sabe filtrar só os treinos do aluno logado, sem precisar passar id
     this.http.get(`${environment.apiUrl}/alunos/treino`).subscribe({
       next: (res: any) => {
         this.treinos = res.sort((a: any, b: any) =>
@@ -43,8 +45,6 @@ export class AlunoTreinosPage implements OnInit {
         this.carregando = false;
       },
       error: (err) => {
-        // o backend retorna 404 quando o aluno não tem nenhum treino com
-        // exercícios ainda — trata como lista vazia, não como erro de verdade
         this.treinos = [];
         this.carregando = false;
         if (err.status !== 404) {
@@ -52,5 +52,17 @@ export class AlunoTreinosPage implements OnInit {
         }
       }
     });
+  }
+
+  toggleVideo(exercicioId: number) {
+    if (this.videosAbertos.has(exercicioId)) {
+      this.videosAbertos.delete(exercicioId);
+    } else {
+      this.videosAbertos.add(exercicioId);
+    }
+  }
+
+  videoEstaAberto(exercicioId: number): boolean {
+    return this.videosAbertos.has(exercicioId);
   }
 }

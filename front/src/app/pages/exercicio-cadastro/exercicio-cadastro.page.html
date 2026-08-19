@@ -27,7 +27,6 @@
 
     <ng-container *ngIf="grupoSelecionado">
 
-      <!-- select de exercício existente: só aparece fora do modo "novo" -->
       <ion-item *ngIf="!modoNovo">
         <ion-select
           label="Exercício"
@@ -49,7 +48,6 @@
         Nenhum exercício cadastrado ainda para esse grupo.
       </ion-note>
 
-      <!-- modo "novo": campo de nome aparece no lugar do select, sem duplicar -->
       <ion-item *ngIf="modoNovo">
         <ion-input
           label="Nome do Exercício"
@@ -71,7 +69,6 @@
         Voltar para a lista de exercícios
       </ion-button>
 
-      <!-- link do vídeo: aparece pra criar novo, ou pra editar um já escolhido -->
       <ion-item *ngIf="modoNovo || exercicioEditandoId">
         <ion-input
           label="Link do Vídeo (YouTube)"
@@ -83,6 +80,12 @@
           placeholder="Ex: https://www.youtube.com/watch?v=...">
         </ion-input>
       </ion-item>
+
+      <!-- pré-visualização: confirma que o link colado é válido antes de salvar -->
+      <app-youtube-embed
+        *ngIf="(modoNovo || exercicioEditandoId) && exercicio.video_url"
+        [url]="exercicio.video_url">
+      </app-youtube-embed>
 
       <ion-button
         *ngIf="isAdmin && (modoNovo || exercicioEditandoId)"
