@@ -6,13 +6,15 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
+import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
+// ajuste o caminho conforme onde o componente ficou salvo
 
 @Component({
   selector: 'app-treino-cadastro',
   templateUrl: './treino-cadastro.page.html',
   styleUrls: ['./treino-cadastro.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RouterModule]
+  imports: [CommonModule, FormsModule, IonicModule, RouterModule, YoutubeEmbedComponent]
 })
 export class TreinoCadastroPage {
 
@@ -40,7 +42,6 @@ export class TreinoCadastroPage {
   }
 
   carregarExercicios() {
-    // o token é anexado automaticamente pelo authInterceptor
     this.http.get(`${environment.apiUrl}/exercicios`).subscribe({
       next: (res: any) => {
         this.exercicios = res;
@@ -53,6 +54,14 @@ export class TreinoCadastroPage {
 
   exerciciosDoGrupo(grupo: string) {
     return this.exercicios.filter(ex => ex.grupo_muscular === grupo);
+  }
+
+  // busca o vídeo já cadastrado do exercício escolhido nesse item — não
+  // precisa o professor colar ou escolher nada, vem junto do exercício
+  videoUrlDoItem(item: { exercicio_id: number | null }): string | null {
+    if (!item.exercicio_id) return null;
+    const ex = this.exercicios.find(e => e.id === item.exercicio_id);
+    return ex?.video_url || null;
   }
 
   adicionarItem() {
@@ -70,9 +79,7 @@ export class TreinoCadastroPage {
       exercicios: this.itens.map((item, i) => ({
         exercicio_id: item.exercicio_id,
         carga: item.carga ? parseInt(String(item.carga).replace(/\D/g, ''), 10) : null,
-        // extrai só os dígitos, então "40kg" também funciona, e trata vazio como null
         repeticoes: item.repeticoes,
-        // esse continua texto mesmo, "3x12" é válido no banco (migration já trata isso)
         ordem: i + 1
       }))
     };

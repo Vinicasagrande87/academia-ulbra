@@ -25,8 +25,7 @@
 
     <ion-card *ngFor="let item of itens; let i = index">
       <ion-card-content>
-        
-        <!-- 1. Escolhe primeiro o Grupo Muscular -->
+
         <ion-item>
           <ion-select
             label="Grupo Muscular"
@@ -40,7 +39,6 @@
           </ion-select>
         </ion-item>
 
-        <!-- 2. Escolhe o Exercício filtrado pelo grupo selecionado -->
         <ion-item>
           <ion-select
             label="Exercício"
@@ -53,6 +51,12 @@
             <ion-select-option *ngFor="let ex of exerciciosDoGrupo(item.grupo)" [value]="ex.id">{{ ex.nome }}</ion-select-option>
           </ion-select>
         </ion-item>
+
+        <!-- vídeo puxado automaticamente do exercício escolhido, sem nenhuma ação extra do professor -->
+        <app-youtube-embed
+          *ngIf="videoUrlDoItem(item)"
+          [url]="videoUrlDoItem(item)!">
+        </app-youtube-embed>
 
         <ion-item>
           <ion-input
