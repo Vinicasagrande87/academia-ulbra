@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
@@ -53,8 +53,6 @@ export class ExercicioCadastroPage {
 
   constructor(
     private http: HttpClient,
-    private toastController: ToastController,
-    private router: Router,
     private authService: AuthService
   ) {}
 
@@ -68,7 +66,6 @@ export class ExercicioCadastroPage {
   }
 
   carregarExercicios() {
-    // sem page/limit na query, o backend devolve a lista inteira de uma vez
     this.http.get<Exercicio[]>(`${environment.apiUrl}/exercicios`).subscribe({
       next: (lista) => this.todosExercicios = lista,
       error: (err) => console.error('Erro ao carregar exercícios:', err)
@@ -79,13 +76,17 @@ export class ExercicioCadastroPage {
     return this.todosExercicios.filter(e => e.grupo_muscular === this.grupoSelecionado);
   }
 
+  get modoNovo(): boolean {
+    return this.exercicioSelecionadoNoSelect === this.OPCAO_NOVO;
+  }
+
   onGrupoChange() {
     this.exercicioSelecionadoNoSelect = '';
     this.resetFormulario();
   }
 
   onExercicioSelecionado() {
-    if (this.exercicioSelecionadoNoSelect === this.OPCAO_NOVO) {
+    if (this.modoNovo) {
       this.resetFormulario();
       return;
     }
@@ -111,34 +112,39 @@ export class ExercicioCadastroPage {
     };
   }
 
-  async salvar() {
-    // PUT se está editando um exercício existente, POST se é novo
+  // checagem manual — não depende do form.valid do Angular, que já se
+  // mostrou pouco confiável nesse ambiente de build
+  podeSalvar(): boolean {
+    if (!this.grupoSelecionado) return false;
+    const videoOk = this.exercicio.video_url.trim().length > 0;
+
+    if (this.modoNovo) {
+      const nomeOk = this.exercicio.nome.trim().length > 0;
+      return nomeOk && videoOk;
+    }
+
+    // editando um exercício já existente
+    return this.exercicioEditandoId !== null && videoOk;
+  }
+
+  salvar() {
+    if (!this.podeSalvar()) {
+      return; // trava extra, além do [disabled] do botão
+    }
+
     const request = this.exercicioEditandoId
       ? this.http.put(`${environment.apiUrl}/exercicios/${this.exercicioEditandoId}`, this.exercicio)
       : this.http.post(`${environment.apiUrl}/exercicios`, this.exercicio);
 
     request.subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: this.exercicioEditandoId
-            ? 'Exercício atualizado com sucesso!'
-            : 'Exercício cadastrado com sucesso!',
-          duration: 2000,
-          color: 'success'
-        });
-        await toast.present();
-        this.exercicioSelecionadoNoSelect = '';
-        this.resetFormulario();
-        this.carregarExercicios(); // recarrega a lista com o dado novo/atualizado
+      next: () => {
+        // window.location.href em vez de router.navigate: garante que a
+        // navegação aconteça de forma confiável após salvar
+        window.location.href = this.voltarPara;
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao salvar exercício:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao salvar exercício.',
-          duration: 2500,
-          color: 'danger'
-        });
-        await toast.present();
+        window.alert(err.error?.error || 'Erro ao salvar exercício.');
       }
     });
   }

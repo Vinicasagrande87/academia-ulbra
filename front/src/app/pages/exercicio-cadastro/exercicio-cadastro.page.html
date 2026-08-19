@@ -27,7 +27,8 @@
 
     <ng-container *ngIf="grupoSelecionado">
 
-      <ion-item>
+      <!-- select de exercício existente: só aparece fora do modo "novo" -->
+      <ion-item *ngIf="!modoNovo">
         <ion-select
           label="Exercício"
           labelPlacement="stacked"
@@ -44,60 +45,53 @@
         </ion-select>
       </ion-item>
 
-      <ion-note *ngIf="exerciciosDoGrupo.length === 0" class="ion-padding-start">
+      <ion-note *ngIf="exerciciosDoGrupo.length === 0 && !modoNovo" class="ion-padding-start">
         Nenhum exercício cadastrado ainda para esse grupo.
       </ion-note>
 
-      <!-- visualização simples pra quem não é admin: só mostra os dados, sem editar -->
-      <div *ngIf="!isAdmin && exercicioEditandoId" class="ion-padding-top ion-padding-start">
-        <p><strong>Equipamento:</strong> {{ exercicio.equipamento || 'Não informado' }}</p>
-        <p *ngIf="exercicio.video_url">
-          <a [href]="exercicio.video_url" target="_blank">Ver vídeo do exercício</a>
-        </p>
-      </div>
+      <!-- modo "novo": campo de nome aparece no lugar do select, sem duplicar -->
+      <ion-item *ngIf="modoNovo">
+        <ion-input
+          label="Nome do Exercício"
+          labelPlacement="stacked"
+          type="text"
+          [(ngModel)]="exercicio.nome"
+          name="nome"
+          required
+          placeholder="Ex: Supino Inclinado">
+        </ion-input>
+      </ion-item>
 
-      <!-- formulário de criar/editar, só aparece pra admin -->
-      <ng-container *ngIf="isAdmin && (exercicioEditandoId || exercicioSelecionadoNoSelect === OPCAO_NOVO)">
+      <ion-button
+        *ngIf="modoNovo"
+        fill="clear"
+        size="small"
+        type="button"
+        (click)="exercicioSelecionadoNoSelect = ''; resetFormulario()">
+        Voltar para a lista de exercícios
+      </ion-button>
 
-        <ion-item>
-          <ion-input
-            label="Nome do Exercício"
-            labelPlacement="stacked"
-            type="text"
-            [(ngModel)]="exercicio.nome"
-            name="nome"
-            required
-            placeholder="Ex: Supino Inclinado">
-          </ion-input>
-        </ion-item>
+      <!-- link do vídeo: aparece pra criar novo, ou pra editar um já escolhido -->
+      <ion-item *ngIf="modoNovo || exercicioEditandoId">
+        <ion-input
+          label="Link do Vídeo (YouTube)"
+          labelPlacement="stacked"
+          type="text"
+          [(ngModel)]="exercicio.video_url"
+          name="video_url"
+          required
+          placeholder="Ex: https://www.youtube.com/watch?v=...">
+        </ion-input>
+      </ion-item>
 
-        <ion-item>
-          <ion-input
-            label="Link do Vídeo (YouTube)"
-            labelPlacement="stacked"
-            type="text"
-            [(ngModel)]="exercicio.video_url"
-            name="video_url"
-            placeholder="Ex: https://www.youtube.com/watch?v=...">
-          </ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-input
-            label="Equipamento"
-            labelPlacement="stacked"
-            type="text"
-            [(ngModel)]="exercicio.equipamento"
-            name="equipamento"
-            placeholder="Ex: Barra, Halteres, Máquina">
-          </ion-input>
-        </ion-item>
-
-        <ion-button expand="block" type="submit" class="ion-margin-top">
-          {{ exercicioEditandoId ? 'ATUALIZAR EXERCÍCIO' : 'SALVAR EXERCÍCIO' }}
-        </ion-button>
-
-      </ng-container>
+      <ion-button
+        *ngIf="isAdmin && (modoNovo || exercicioEditandoId)"
+        expand="block"
+        type="submit"
+        class="ion-margin-top"
+        [disabled]="!podeSalvar()">
+        {{ exercicioEditandoId ? 'ATUALIZAR EXERCÍCIO' : 'SALVAR EXERCÍCIO' }}
+      </ion-button>
 
     </ng-container>
   </form>
