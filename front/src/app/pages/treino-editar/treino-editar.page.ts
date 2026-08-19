@@ -1,7 +1,7 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastController } from '@ionic/angular';
 import {
@@ -26,13 +26,10 @@ import { environment } from '../../../environments/environment';
 })
 export class TreinoEditarPage implements OnInit {
 
-  // rota é /treino-editar/:alunoId/:dia (ex: /treino-editar/1/Segunda-feira)
   alunoId: string | null = null;
   dia = '';
 
   treinoId: number | null = null;
-  // id do registro em "treinos", descoberto depois de buscar a lista do aluno
-  // e filtrar pelo dia_semana. É esse id que usamos no PUT pra salvar.
 
   gruposMusculares = ['Peito', 'Costas', 'Ombro', 'Braço', 'Abdômen', 'Glúteo', 'Pernas'];
 
@@ -42,11 +39,8 @@ export class TreinoEditarPage implements OnInit {
   constructor(
     private http: HttpClient,
     private route: ActivatedRoute,
-    private router: Router,
     private toastController: ToastController,
     private ngZone: NgZone
-    // necessário pro toast aparecer de forma confiável — ver comentário
-    // detalhado em login.page.ts sobre o motivo
   ) {}
 
   ngOnInit() {
@@ -57,13 +51,10 @@ export class TreinoEditarPage implements OnInit {
   }
 
   carregarExercicios() {
-    // o token é anexado automaticamente pelo authInterceptor
     this.http.get(`${environment.apiUrl}/exercicios`).subscribe({
       next: (res: any) => {
         this.exerciciosCatalogo = res;
         this.carregarTreino();
-        // só busca o treino depois do catálogo estar carregado, pra já
-        // conseguir preencher o campo "grupo" de cada item existente
       },
       error: (err) => {
         console.error('Erro ao carregar exercícios:', err);
@@ -139,15 +130,10 @@ export class TreinoEditarPage implements OnInit {
 
     this.http.put(`${environment.apiUrl}/treinos/${this.treinoId}`, treino).subscribe({
       next: () => {
-        this.ngZone.run(async () => {
-          const toast = await this.toastController.create({
-            message: 'Treino atualizado com sucesso!',
-            duration: 2000,
-            color: 'success'
-          });
-          await toast.present();
-          this.router.navigate(['/aluno-ficha', this.alunoId]);
-        });
+        // window.location.href em vez de router.navigate: garante que a
+        // navegação aconteça de forma confiável após salvar, igual fizemos
+        // nas outras telas de cadastro/edição
+        window.location.href = `/aluno-ficha/${this.alunoId}`;
       },
       error: (err) => {
         console.error('Erro ao salvar edição:', err);
