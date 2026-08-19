@@ -8,47 +8,97 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form (ngSubmit)="cadastrarExercicio()">
-
-    <ion-item>
-      <ion-input
-        label="Nome do Exercício"
-        labelPlacement="stacked"
-        type="text"
-        [(ngModel)]="exercicio.nome"
-        name="nome"
-        required
-        placeholder="Ex: Supino Inclinado">
-      </ion-input>
-    </ion-item>
+  <form (ngSubmit)="salvar()">
 
     <ion-item>
       <ion-select
         label="Grupo Muscular"
         labelPlacement="stacked"
-        [(ngModel)]="exercicio.grupo_muscular"
-        name="grupo_muscular"
+        [(ngModel)]="grupoSelecionado"
+        name="grupoSelecionado"
         required
-        placeholder="Selecione o grupo">
+        placeholder="Selecione o grupo"
+        (ionChange)="onGrupoChange()">
         <ion-select-option *ngFor="let grupo of gruposMusculares" [value]="grupo">
           {{ grupo }}
         </ion-select-option>
       </ion-select>
     </ion-item>
 
-    <ion-item>
-      <ion-input
-        label="Link do Vídeo (YouTube)"
-        labelPlacement="stacked"
-        type="text"
-        [(ngModel)]="exercicio.video_url"
-        name="video_url"
-        placeholder="Ex: https://www.youtube.com/watch?v=...">
-      </ion-input>
-    </ion-item>
+    <ng-container *ngIf="grupoSelecionado">
 
-    <ion-button expand="block" type="submit" class="ion-margin-top">
-      SALVAR EXERCÍCIO
-    </ion-button>
+      <ion-item>
+        <ion-select
+          label="Exercício"
+          labelPlacement="stacked"
+          [(ngModel)]="exercicioSelecionadoNoSelect"
+          name="exercicioSelect"
+          placeholder="Selecione um exercício"
+          (ionChange)="onExercicioSelecionado()">
+          <ion-select-option *ngFor="let ex of exerciciosDoGrupo" [value]="ex.id">
+            {{ ex.nome }}
+          </ion-select-option>
+          <ion-select-option *ngIf="isAdmin" [value]="OPCAO_NOVO">
+            + Cadastrar novo exercício
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-note *ngIf="exerciciosDoGrupo.length === 0" class="ion-padding-start">
+        Nenhum exercício cadastrado ainda para esse grupo.
+      </ion-note>
+
+      <!-- visualização simples pra quem não é admin: só mostra os dados, sem editar -->
+      <div *ngIf="!isAdmin && exercicioEditandoId" class="ion-padding-top ion-padding-start">
+        <p><strong>Equipamento:</strong> {{ exercicio.equipamento || 'Não informado' }}</p>
+        <p *ngIf="exercicio.video_url">
+          <a [href]="exercicio.video_url" target="_blank">Ver vídeo do exercício</a>
+        </p>
+      </div>
+
+      <!-- formulário de criar/editar, só aparece pra admin -->
+      <ng-container *ngIf="isAdmin && (exercicioEditandoId || exercicioSelecionadoNoSelect === OPCAO_NOVO)">
+
+        <ion-item>
+          <ion-input
+            label="Nome do Exercício"
+            labelPlacement="stacked"
+            type="text"
+            [(ngModel)]="exercicio.nome"
+            name="nome"
+            required
+            placeholder="Ex: Supino Inclinado">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Link do Vídeo (YouTube)"
+            labelPlacement="stacked"
+            type="text"
+            [(ngModel)]="exercicio.video_url"
+            name="video_url"
+            placeholder="Ex: https://www.youtube.com/watch?v=...">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Equipamento"
+            labelPlacement="stacked"
+            type="text"
+            [(ngModel)]="exercicio.equipamento"
+            name="equipamento"
+            placeholder="Ex: Barra, Halteres, Máquina">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" type="submit" class="ion-margin-top">
+          {{ exercicioEditandoId ? 'ATUALIZAR EXERCÍCIO' : 'SALVAR EXERCÍCIO' }}
+        </ion-button>
+
+      </ng-container>
+
+    </ng-container>
   </form>
 </ion-content>
