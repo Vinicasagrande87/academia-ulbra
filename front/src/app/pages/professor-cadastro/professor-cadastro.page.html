@@ -8,7 +8,7 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form (ngSubmit)="cadastrarProfessor()">
+  <form #professorForm="ngForm" (ngSubmit)="cadastrarProfessor()">
     <ion-item>
       <ion-input
         label="Nome completo"
@@ -16,10 +16,14 @@
         type="text"
         [(ngModel)]="professor.nome"
         name="nome"
+        #nome="ngModel"
         required
         placeholder="Nome completo">
       </ion-input>
     </ion-item>
+    <ion-note color="danger" *ngIf="nome.invalid && (nome.touched || professorForm.submitted)">
+      Campo obrigatório
+    </ion-note>
 
     <ion-item>
       <ion-input
@@ -28,11 +32,15 @@
         type="email"
         [(ngModel)]="professor.email"
         name="email"
+        #email="ngModel"
         autocomplete="off"
         required
         placeholder="professor@academia.com">
       </ion-input>
     </ion-item>
+    <ion-note color="danger" *ngIf="email.invalid && (email.touched || professorForm.submitted)">
+      Campo obrigatório
+    </ion-note>
 
     <ion-item>
       <ion-input
@@ -41,11 +49,16 @@
         type="password"
         [(ngModel)]="professor.senha"
         name="senha"
+        #senha="ngModel"
         autocomplete="new-password"
         required
+        minlength="6"
         placeholder="Senha inicial">
       </ion-input>
     </ion-item>
+    <ion-note color="danger" *ngIf="senha.invalid && (senha.touched || professorForm.submitted)">
+      Campo obrigatório (mínimo 6 caracteres)
+    </ion-note>
 
     <ion-item>
       <ion-input
@@ -69,7 +82,7 @@
       </ion-input>
     </ion-item>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top">
+    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="!podeSalvar()">
       SALVAR PROFESSOR
     </ion-button>
   </form>

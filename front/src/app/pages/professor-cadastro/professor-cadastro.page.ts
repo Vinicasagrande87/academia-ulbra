@@ -41,7 +41,20 @@ export class ProfessorCadastroPage {
     this.voltarPara = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
   }
 
+  // checagem manual, direta nos valores do objeto — não depende do
+  // professorForm.valid do Angular, que se mostrou pouco confiável
+  // nesse ambiente de build
+  podeSalvar(): boolean {
+    const nomeOk = this.professor.nome.trim().length > 0;
+    const emailOk = this.professor.email.trim().length > 0 && this.professor.email.includes('@');
+    const senhaOk = this.professor.senha.length >= 6;
+    return nomeOk && emailOk && senhaOk;
+  }
+
   cadastrarProfessor() {
+    if (!this.podeSalvar()) {
+      return; // trava extra, além do [disabled] do botão
+    }
     this.http.post(`${environment.apiUrl}/professores`, this.professor).subscribe({
       next: () => {
         // window.location.href em vez de router.navigate: garante que a
