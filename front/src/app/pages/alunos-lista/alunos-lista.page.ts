@@ -80,15 +80,13 @@ export class AlunosListaPage implements OnInit {
     );
   }
 
-  // passo 1: escolher qual plano o aluno pagou
+  // passo 1: escolher qual plano o aluno pagou (só rádio, isolado)
   async vincularPlano(aluno: any, event: Event) {
     event.preventDefault();
     event.stopPropagation();
     // preventDefault bloqueia a navegação nativa do link (routerLink do
     // ion-item); stopPropagation sozinho não bastava porque o Ionic
-    // renderiza o item clicável como uma tag <a>, que navega por padrão
-    // assim que qualquer parte dela é clicada, mesmo que a propagação do
-    // evento JS seja interrompida
+    // renderiza o item clicável como uma tag <a>
 
     if (this.planos.length === 0) {
       const toast = await this.toastController.create({
@@ -121,21 +119,37 @@ export class AlunosListaPage implements OnInit {
     await alert.present();
   }
 
-  // passo 2: confirmar forma de pagamento, valor (editável, ex: desconto) e observação
+  // passo 2: escolher a forma de pagamento (só rádio, isolado)
   private async escolherFormaPagamento(aluno: any, planoId: number) {
+    const alert = await this.alertController.create({
+      header: 'Forma de pagamento',
+      inputs: this.formasPagamento.map((forma, index) => ({
+        name: 'forma_pagamento',
+        type: 'radio' as const,
+        label: forma.label,
+        value: forma.valor,
+        checked: index === 0
+      })),
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Próximo',
+          handler: (formaPagamento) => this.confirmarValor(aluno, planoId, formaPagamento)
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  // passo 3: confirmar valor (editável, ex: desconto) e observação — só texto/número, isolado
+  private async confirmarValor(aluno: any, planoId: number, formaPagamento: string) {
     const plano = this.planos.find(p => p.id === planoId);
     if (!plano) return;
 
     const alert = await this.alertController.create({
-      header: 'Forma de pagamento',
+      header: 'Confirmar valor pago',
       inputs: [
-        ...this.formasPagamento.map((forma, index) => ({
-          name: 'forma_pagamento',
-          type: 'radio' as const,
-          label: forma.label,
-          value: forma.valor,
-          checked: index === 0
-        })),
         {
           name: 'valor',
           type: 'number',
@@ -152,7 +166,7 @@ export class AlunosListaPage implements OnInit {
         { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Confirmar pagamento',
-          handler: (dados) => this.registrarPagamento(aluno, planoId, dados)
+          handler: (dados) => this.registrarPagamento(aluno, planoId, formaPagamento, dados)
         }
       ]
     });
@@ -160,12 +174,12 @@ export class AlunosListaPage implements OnInit {
     await alert.present();
   }
 
-  private registrarPagamento(aluno: any, planoId: number, dados: any) {
+  private registrarPagamento(aluno: any, planoId: number, formaPagamento: string, dados: any) {
     this.http.post(`${environment.apiUrl}/pagamentos`, {
       aluno_id: aluno.id,
       plano_id: planoId,
       valor: parseFloat(dados.valor),
-      forma_pagamento: dados.forma_pagamento,
+      forma_pagamento: formaPagamento,
       observacao: dados.observacao
     }).subscribe({
       next: async () => {
