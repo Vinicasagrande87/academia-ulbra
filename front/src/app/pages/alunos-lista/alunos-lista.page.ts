@@ -82,9 +82,13 @@ export class AlunosListaPage implements OnInit {
 
   // passo 1: escolher qual plano o aluno pagou
   async vincularPlano(aluno: any, event: Event) {
+    event.preventDefault();
     event.stopPropagation();
-    // impede que o clique no botão também dispare a navegação pro
-    // routerLink do ion-item (que abriria a ficha do aluno)
+    // preventDefault bloqueia a navegação nativa do link (routerLink do
+    // ion-item); stopPropagation sozinho não bastava porque o Ionic
+    // renderiza o item clicável como uma tag <a>, que navega por padrão
+    // assim que qualquer parte dela é clicada, mesmo que a propagação do
+    // evento JS seja interrompida
 
     if (this.planos.length === 0) {
       const toast = await this.toastController.create({
