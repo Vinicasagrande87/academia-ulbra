@@ -23,6 +23,13 @@
         <p>{{ aluno.email }}</p>
         <p *ngIf="aluno.finalidade">{{ aluno.finalidade }}</p>
       </ion-label>
+      <ion-button
+        slot="end"
+        fill="outline"
+        size="small"
+        (click)="vincularPlano(aluno, $event)">
+        Vincular plano
+      </ion-button>
     </ion-item>
   </ion-list>
 
