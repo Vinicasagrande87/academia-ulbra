@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
@@ -28,9 +28,7 @@ export class TreinoCadastroPage {
 
   constructor(
     private http: HttpClient,
-    private route: ActivatedRoute,
-    private router: Router,
-    private toastController: ToastController
+    private route: ActivatedRoute
   ) {}
 
   ionViewWillEnter() {
@@ -56,8 +54,6 @@ export class TreinoCadastroPage {
     return this.exercicios.filter(ex => ex.grupo_muscular === grupo);
   }
 
-  // busca o vídeo já cadastrado do exercício escolhido nesse item — não
-  // precisa o professor colar ou escolher nada, vem junto do exercício
   videoUrlDoItem(item: { exercicio_id: number | null }): string | null {
     if (!item.exercicio_id) return null;
     const ex = this.exercicios.find(e => e.id === item.exercicio_id);
@@ -72,7 +68,25 @@ export class TreinoCadastroPage {
     this.itens.splice(index, 1);
   }
 
-  async salvarTreino() {
+  // checagem manual — cada exercício da lista precisa estar completo
+  // (grupo, exercício, carga e repetições), além do dia da semana escolhido
+  podeSalvar(): boolean {
+    if (!this.diaSemana) return false;
+    if (this.itens.length === 0) return false;
+
+    return this.itens.every(item =>
+      !!item.grupo &&
+      !!item.exercicio_id &&
+      !!item.carga?.trim() &&
+      !!item.repeticoes?.trim()
+    );
+  }
+
+  salvarTreino() {
+    if (!this.podeSalvar()) {
+      return; // trava extra, além do [disabled] do botão
+    }
+
     const treino = {
       aluno_id: Number(this.alunoId),
       dia_semana: this.diaSemana,
@@ -85,23 +99,12 @@ export class TreinoCadastroPage {
     };
 
     this.http.post(`${environment.apiUrl}/treinos`, treino).subscribe({
-      next: async () => {
-        const toast = await this.toastController.create({
-          message: 'Treino montado com sucesso!',
-          duration: 2000,
-          color: 'success'
-        });
-        await toast.present();
-        this.router.navigate(['/aluno-ficha', this.alunoId]);
+      next: () => {
+        window.location.href = `/aluno-ficha/${this.alunoId}`;
       },
-      error: async (err) => {
+      error: (err) => {
         console.error('Erro ao salvar treino:', err);
-        const toast = await this.toastController.create({
-          message: err.error?.error || 'Erro ao montar treino.',
-          duration: 2500,
-          color: 'danger'
-        });
-        await toast.present();
+        window.alert(err.error?.error || 'Erro ao montar treino.');
       }
     });
   }
