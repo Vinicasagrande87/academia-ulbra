@@ -1,3 +1,5 @@
+const { traduzirTermoBusca } = require('../utils/traducaoExercicios');
+
 const WORKOUTX_BASE = 'https://api.workoutxapp.com';
 const WORKOUTX_KEY = process.env.WORKOUTX_API_KEY;
 // a chave só existe aqui, no servidor — nunca é enviada pro navegador
@@ -5,8 +7,8 @@ const WORKOUTX_KEY = process.env.WORKOUTX_API_KEY;
 module.exports = {
 
     async search(req, res) {
-    // busca exercícios no catálogo do WorkoutX pelo nome (em inglês), usada
-    // pelo admin na hora de cadastrar/editar um exercício
+    // busca exercícios no catálogo do WorkoutX; o admin digita em português,
+    // aqui a gente traduz pros termos mais próximos em inglês antes de buscar
         try {
             const tipoUsuario = req.userType;
 
@@ -17,10 +19,12 @@ module.exports = {
             const { name } = req.query;
 
             if (!name) {
-                return res.status(400).json({ error: 'Informe o nome do exercício para buscar (em inglês, ex: "bench press").' });
+                return res.status(400).json({ error: 'Informe o nome do exercício para buscar.' });
             }
 
-            const resposta = await fetch(`${WORKOUTX_BASE}/v1/exercises/name/${encodeURIComponent(name)}`, {
+            const termoTraduzido = traduzirTermoBusca(name);
+
+            const resposta = await fetch(`${WORKOUTX_BASE}/v1/exercises/name/${encodeURIComponent(termoTraduzido)}`, {
                 headers: { 'X-WorkoutX-Key': WORKOUTX_KEY }
             });
 
@@ -40,7 +44,7 @@ module.exports = {
                 equipment: ex.equipment
             }));
 
-            return res.json(resultado);
+            return res.json({ termo_buscado: name, termo_traduzido: termoTraduzido, resultados: resultado });
 
         } catch (error) {
             console.error(error);

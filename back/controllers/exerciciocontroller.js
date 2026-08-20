@@ -16,20 +16,23 @@ module.exports = {
                 return res.status(403).json({ error: 'Acesso negado. Apenas o administrador pode cadastrar exercícios.' });
             }
 
-            const { nome, grupo_muscular, video_url, equipamento } = req.body;
+            const { nome, grupo_muscular, video_url, equipamento, workoutx_id } = req.body;
             // desestruturando os dados enviados na requisição
+            // workoutx_id: guarda o ID do exercício no catálogo do WorkoutX, quando
+            // o admin escolhe um gif de lá em vez de colar link do YouTube manualmente
 
             const [{ id }] = await connection('exercicios').insert({
             // insere o novo exercício na tabela exercicios
                 nome,
                 grupo_muscular,
                 video_url,
-                equipamento
+                equipamento,
+                workoutx_id
             }).returning('id');
             // no Postgres precisa do .returning('id') pra receber o ID de volta,
             // e ele volta dentro de um objeto: [{ id: 5 }], por isso o [{ id }]
 
-            return res.status(201).json({ id, nome, grupo_muscular, video_url, equipamento });
+            return res.status(201).json({ id, nome, grupo_muscular, video_url, equipamento, workoutx_id });
             // retorna o exercício recém-criado
 
         } catch (error) {
@@ -89,7 +92,7 @@ module.exports = {
             const { id } = req.params;
             // pegando o ID do exercício que vem na URL da requisição
 
-            const { nome, grupo_muscular, video_url, equipamento } = req.body;
+            const { nome, grupo_muscular, video_url, equipamento, workoutx_id } = req.body;
             // pegando os novos dados enviados na requisição
 
             await connection('exercicios')
@@ -98,7 +101,8 @@ module.exports = {
                     nome,
                     grupo_muscular,
                     video_url,
-                    equipamento
+                    equipamento,
+                    workoutx_id
                 });
             // atualiza os dados no banco
 
