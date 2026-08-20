@@ -38,7 +38,13 @@ const FRASES = {
     'abdominal infra': 'reverse crunch',
     'abdominal oblíquo': 'oblique crunch',
     'desenvolvimento militar': 'military press',
-    'desenvolvimento com halteres': 'dumbbell shoulder press',
+    'desenvolvimento com halteres': 'shoulder press',
+    // 'dumbbell shoulder press' não retorna nada na API do WorkoutX;
+    // o termo mais genérico 'shoulder press' já traz as variações com halteres
+    'supino inclinado com halteres': 'dumbbell incline bench press',
+    'elevação de pernas': 'hanging leg raise',
+    'leg press 45': 'leg press',
+    // API não reconhece o "45" (é o ângulo da máquina, não faz parte do nome em inglês)
 };
 
 const PALAVRAS = {
