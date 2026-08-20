@@ -34,8 +34,6 @@ module.exports = {
 
             const dados = await resposta.json();
 
-            // devolve só o que o front precisa pra exibir a lista de opções —
-            // nunca a chave, nunca a URL crua do WorkoutX
             const resultado = (dados.data || []).map(ex => ({
                 workoutx_id: ex.id,
                 nome_original: ex.name,
@@ -56,9 +54,6 @@ module.exports = {
     // funciona como um "espelho": o navegador pede o gif pra cá, este
     // endpoint busca no WorkoutX usando a chave escondida, e devolve a
     // imagem pronta — a chave nunca chega até o navegador do usuário final.
-    // Público de propósito: uma tag <img src="..."> não consegue mandar
-    // cabeçalho de autenticação, e o conteúdo (gif de um exercício) não é
-    // um dado sensível — só a chave da API precisava ficar protegida.
         try {
             const { id } = req.params;
 
@@ -72,9 +67,12 @@ module.exports = {
 
             res.set('Content-Type', 'image/gif');
             res.set('Cache-Control', 'public, max-age=604800');
-            // fica em cache no navegador por 7 dias — o gif de um exercício não
-            // muda, então isso evita gastar cota da API toda hora que alguém
-            // reabre a mesma tela
+            res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+            // o helmet() no server.js bloqueia por padrão imagens carregadas de
+            // um domínio diferente (front e back são domínios separados no
+            // Vercel); aqui liberamos especificamente essa rota, já que o
+            // conteúdo é público (gif de demonstração de exercício, sem
+            // dado sensível) e precisa ser exibido no <img> do front
 
             return res.send(buffer);
 
