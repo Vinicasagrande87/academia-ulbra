@@ -27,17 +27,18 @@
                 <p>Carga: {{ ex.carga }}kg • Repetições: {{ ex.repeticoes }}</p>
 
                 <ion-button
-                  *ngIf="ex.video_url"
+                  *ngIf="ex.video_url || ex.workoutx_id"
                   fill="clear"
                   size="small"
-                  (click)="toggleVideo(ex.exercicio_id)">
-                  {{ videoEstaAberto(ex.exercicio_id) ? 'Ocultar vídeo' : 'Ver vídeo do exercício' }}
+                  (click)="toggleMidia(ex.exercicio_id)">
+                  {{ midiaEstaAberta(ex.exercicio_id) ? 'Ocultar demonstração' : 'Ver demonstração' }}
                 </ion-button>
 
-                <app-youtube-embed
-                  *ngIf="ex.video_url && videoEstaAberto(ex.exercicio_id)"
-                  [url]="ex.video_url">
-                </app-youtube-embed>
+                <app-exercicio-midia
+                  *ngIf="(ex.video_url || ex.workoutx_id) && midiaEstaAberta(ex.exercicio_id)"
+                  [workoutxId]="ex.workoutx_id"
+                  [videoUrl]="ex.video_url">
+                </app-exercicio-midia>
               </ion-label>
             </ion-item>
           </ion-list>

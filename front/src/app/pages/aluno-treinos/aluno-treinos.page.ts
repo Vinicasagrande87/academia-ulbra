@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
-import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
+import { ExercicioMidiaComponent } from '../../components/exercicio-midia/exercicio-midia.component';
 // ajuste o caminho conforme onde o componente ficou salvo
 
 @Component({
@@ -12,7 +12,7 @@ import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-em
   templateUrl: './aluno-treinos.page.html',
   styleUrls: ['./aluno-treinos.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, YoutubeEmbedComponent]
+  imports: [CommonModule, IonicModule, ExercicioMidiaComponent]
 })
 export class AlunoTreinosPage implements OnInit {
 
@@ -21,9 +21,9 @@ export class AlunoTreinosPage implements OnInit {
   treinos: any[] = [];
   carregando = true;
 
-  // controla quais vídeos estão abertos, pra não carregar todos os iframes
-  // de uma vez (pesado se o treino tiver muitos exercícios)
-  videosAbertos = new Set<number>();
+  // controla quais exercícios estão com a mídia (gif/vídeo) aberta, pra não
+  // carregar tudo de uma vez (pesado se o treino tiver muitos exercícios)
+  midiasAbertas = new Set<number>();
 
   constructor(private http: HttpClient) {}
 
@@ -54,15 +54,15 @@ export class AlunoTreinosPage implements OnInit {
     });
   }
 
-  toggleVideo(exercicioId: number) {
-    if (this.videosAbertos.has(exercicioId)) {
-      this.videosAbertos.delete(exercicioId);
+  toggleMidia(exercicioId: number) {
+    if (this.midiasAbertas.has(exercicioId)) {
+      this.midiasAbertas.delete(exercicioId);
     } else {
-      this.videosAbertos.add(exercicioId);
+      this.midiasAbertas.add(exercicioId);
     }
   }
 
-  videoEstaAberto(exercicioId: number): boolean {
-    return this.videosAbertos.has(exercicioId);
+  midiaEstaAberta(exercicioId: number): boolean {
+    return this.midiasAbertas.has(exercicioId);
   }
 }
