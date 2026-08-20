@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
+import { AuthService } from '../../services/auth';
 
 // todos os campos são texto livre; a lista abaixo é usada só pra validar
 // que nada ficou em branco antes de liberar o botão de salvar
@@ -54,7 +55,8 @@ export class AlunoAnamnesePage implements OnInit {
   constructor(
     private http: HttpClient,
     private route: ActivatedRoute,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -94,14 +96,12 @@ export class AlunoAnamnesePage implements OnInit {
     this.salvando = true;
 
     this.http.put(`${environment.apiUrl}/anamnese/${this.alunoId}`, this.anamnese).subscribe({
-      next: async () => {
-        this.salvando = false;
-        const toast = await this.toastController.create({
-          message: 'Anamnese salva com sucesso!',
-          duration: 2000,
-          color: 'success'
-        });
-        await toast.present();
+      next: () => {
+        const usuario = this.authService.getUser();
+        // window.location.href em vez de router.navigate: garante que a
+        // navegação aconteça de forma confiável após salvar, igual fizemos
+        // nas outras telas de cadastro/edição
+        window.location.href = usuario?.tipo === 'admin' ? '/home-admin' : '/home-professor';
       },
       error: async (err) => {
         this.salvando = false;
