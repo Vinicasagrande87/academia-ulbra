@@ -14,9 +14,12 @@
 
   <form *ngIf="!carregando" (ngSubmit)="salvar()">
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Pratica alguma atividade desportiva atualmente?</ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Pratica alguma atividade desportiva atualmente?"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.pratica_atividade_atualmente"
         name="pratica_atividade_atualmente"
@@ -26,9 +29,12 @@
       </ion-textarea>
     </ion-item>
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Praticou alguma atividade física/desporto anteriormente?</ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Praticou alguma atividade física/desporto anteriormente?"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.praticou_atividade_anteriormente"
         name="praticou_atividade_anteriormente"
@@ -38,9 +44,15 @@
       </ion-textarea>
     </ion-item>
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">
+        Teve ou tem problemas osteoarticulares?
+        <p>(ex.: fraturas, lordoses, hérnias)</p>
+      </ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Teve ou tem problemas osteoarticulares? (ex.: fraturas, lordoses, hérnias)"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.problema_osteoarticular"
         name="problema_osteoarticular"
@@ -50,9 +62,15 @@
       </ion-textarea>
     </ion-item>
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">
+        Teve ou tem problemas neuromusculares?
+        <p>(ex.: entorses, edemas, ruturas de ligamentos, micro/macro ruturas)</p>
+      </ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Teve ou tem problemas neuromusculares? (ex.: entorses, edemas, ruturas de ligamentos, micro/macro ruturas)"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.problema_neuromuscular"
         name="problema_neuromuscular"
@@ -62,9 +80,12 @@
       </ion-textarea>
     </ion-item>
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Sofre de problemas coronários? Risco familiar?</ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Sofre de problemas coronários? Risco familiar?"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.problema_coronario"
         name="problema_coronario"
@@ -74,9 +95,12 @@
       </ion-textarea>
     </ion-item>
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Sofre de problemas vasculares?</ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Sofre de problemas vasculares?"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.problema_vascular"
         name="problema_vascular"
@@ -86,9 +110,12 @@
       </ion-textarea>
     </ion-item>
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Foi hospitalizado nos últimos cinco anos?</ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Foi hospitalizado nos últimos cinco anos?"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.hospitalizado_5_anos"
         name="hospitalizado_5_anos"
@@ -98,9 +125,12 @@
       </ion-textarea>
     </ion-item>
 
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Fez alguma cirurgia nos últimos cinco anos?</ion-label>
+    </ion-item>
     <ion-item>
       <ion-textarea
-        label="Fez alguma cirurgia nos últimos cinco anos?"
+        label="Resposta"
         labelPlacement="stacked"
         [(ngModel)]="anamnese.cirurgia_5_anos"
         name="cirurgia_5_anos"

@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { addIcons } from 'ionicons';
-import { medkitOutline } from 'ionicons/icons';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { calcularSituacaoPlano } from '../aluno-financeiro/aluno-financeiro.page';
@@ -33,9 +31,7 @@ export class AlunoFichaPage implements OnInit {
     private route: ActivatedRoute,
     private alertController: AlertController,
     private toastController: ToastController
-  ) {
-    addIcons({ 'medkit-outline': medkitOutline });
-  }
+  ) {}
 
   ngOnInit() {
     this.alunoId = this.route.snapshot.paramMap.get('id');
