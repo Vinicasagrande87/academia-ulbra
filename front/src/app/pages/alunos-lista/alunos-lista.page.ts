@@ -175,10 +175,21 @@ export class AlunosListaPage implements OnInit {
   }
 
   private registrarPagamento(aluno: any, planoId: number, formaPagamento: string, dados: any) {
+    const valor = parseFloat(dados.valor);
+
+    if (isNaN(valor) || valor <= 0) {
+      this.toastController.create({
+        message: 'Informe um valor válido para o pagamento.',
+        duration: 2500,
+        color: 'danger'
+      }).then(toast => toast.present());
+      return;
+    }
+
     this.http.post(`${environment.apiUrl}/pagamentos`, {
       aluno_id: aluno.id,
       plano_id: planoId,
-      valor: parseFloat(dados.valor),
+      valor,
       forma_pagamento: formaPagamento,
       observacao: dados.observacao
     }).subscribe({

@@ -57,7 +57,13 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const resposta = await fetch(`${WORKOUTX_BASE}/v1/gifs/${id}.gif?api-key=${WORKOUTX_KEY}`);
+            if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+            // o id do WorkoutX é sempre alfanumérico; barra isso aqui pra
+            // ninguém injetar '?', '#' ou '/' e alterar a URL/chave enviada
+                return res.status(400).json({ error: 'Id de gif inválido.' });
+            }
+
+            const resposta = await fetch(`${WORKOUTX_BASE}/v1/gifs/${encodeURIComponent(id)}.gif?api-key=${WORKOUTX_KEY}`);
 
             if (!resposta.ok) {
                 return res.status(resposta.status).send();

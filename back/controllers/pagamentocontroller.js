@@ -42,6 +42,10 @@ module.exports = {
                 // diferente do fluxo do aluno, que sempre usa o valor do plano
                 const { aluno_id, plano_id, valor, forma_pagamento, data_pagamento, observacao } = req.body;
 
+                if (!aluno_id || valor === undefined || valor === null || isNaN(Number(valor))) {
+                    return res.status(400).json({ error: 'Informe o aluno e um valor válido para o pagamento.' });
+                }
+
                 const plano = await connection('planos').where('id', plano_id).first();
 
                 if (!plano) {
@@ -197,7 +201,7 @@ module.exports = {
                 dadosParaAtualizar.valido_ate = calcularValidade(dataPagamentoFinal, pagamentoAtual?.duracao_dias);
                 dadosParaAtualizar.confirmado_por_nome = await buscarNomeStaff(tipoUsuario, req.userId);
             } else if (data_pagamento) {
-                dadosParaAtualizar.data_pagamento = data_pagamento;
+                dadosParaAtualizar.data_pagamento = new Date(data_pagamento);
             }
 
             await connection('pagamentos')
@@ -246,7 +250,8 @@ async function buscarNomeStaff(tipoUsuario, userId) {
 
 function calcularValidade(dataPagamento, duracaoDias) {
 // soma a duração do plano (em dias) à data do pagamento, pra saber até quando vale
-    if (!duracaoDias) {
+    if (duracaoDias === null || duracaoDias === undefined) {
+    // usa === pra não tratar 0 (plano sem duração fixa) como "sem duração"
         return null;
     }
 

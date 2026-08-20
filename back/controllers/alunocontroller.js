@@ -143,6 +143,15 @@ module.exports = {
     async treino (req, res){
     // aluno vê os treinos disponíveis pra ele (dia, exercício, carga, repetição e vídeo)
         try {
+            const tipoUsuario = req.userType;
+
+            if (tipoUsuario !== 'aluno') {
+            // sem essa checagem, um professor ou admin logado veria os treinos do
+            // aluno que por coincidência tem o mesmo id que ele, já que alunos,
+            // professores e admins são tabelas separadas com ids independentes
+                return res.status(403).json({ error: 'Acesso negado. Apenas o próprio aluno pode ver seus treinos.' });
+            }
+
             const id = req.userId;
 
             const treinos = await connection('treinos')
@@ -153,19 +162,28 @@ module.exports = {
                 return res.status(404).json({ error: 'Nenhum treino encontrado para este aluno.' });
             }
 
+            // busca os itens de todos os treinos numa query só (evita N+1:
+            // uma query por treino ficava lento com muitos treinos)
+            const treinoIds = treinos.map(treino => treino.id);
+
+            const itens = await connection('treino_itens')
+                .join('exercicios', 'exercicios.id', '=', 'treino_itens.exercicio_id')
+                .select(
+                    'treino_itens.treino_id',
+                    'exercicios.id as exercicio_id',
+                    'exercicios.nome as exercicio_nome',
+                    'exercicios.video_url',
+                    'exercicios.workoutx_id',
+                    'treino_itens.carga',
+                    'treino_itens.repeticoes'
+                )
+                .whereIn('treino_itens.treino_id', treinoIds)
+                .orderBy('treino_itens.ordem');
+
             for (const treino of treinos) {
-                treino.exercicios = await connection('treino_itens')
-                    .join('exercicios', 'exercicios.id', '=', 'treino_itens.exercicio_id')
-                    .select(
-                        'exercicios.id as exercicio_id',
-                        'exercicios.nome as exercicio_nome',
-                        'exercicios.video_url',
-                        'exercicios.workoutx_id',
-                        'treino_itens.carga',
-                        'treino_itens.repeticoes'
-                    )
-                    .where('treino_itens.treino_id', treino.id)
-                    .orderBy('treino_itens.ordem');
+                treino.exercicios = itens
+                    .filter(item => item.treino_id === treino.id)
+                    .map(({ treino_id, ...resto }) => resto);
             }
 
             const treinosComExercicios = treinos.filter(treino => treino.exercicios.length > 0);

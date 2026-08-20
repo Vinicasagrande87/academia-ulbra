@@ -105,7 +105,30 @@ export class TreinoEditarPage implements OnInit {
     this.itens.splice(index, 1);
   }
 
+  podeSalvar(): boolean {
+    if (this.itens.length === 0) return false;
+
+    return this.itens.every(item =>
+      !!item.grupo &&
+      !!item.exercicio_id &&
+      !!item.carga?.trim() &&
+      !!item.repeticoes?.trim()
+    );
+  }
+
   salvarEdicao() {
+    if (!this.podeSalvar()) {
+      this.ngZone.run(async () => {
+        const toast = await this.toastController.create({
+          message: 'Preencha grupo, exercício, carga e repetições de todos os itens.',
+          duration: 2500,
+          color: 'danger'
+        });
+        await toast.present();
+      });
+      return;
+    }
+
     if (!this.treinoId) {
       this.ngZone.run(async () => {
         const toast = await this.toastController.create({

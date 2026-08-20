@@ -175,10 +175,12 @@ export class ExercicioCadastroPage {
 
   podeSalvar(): boolean {
     if (!this.grupoSelecionado) return false;
-    if (!this.exercicio.workoutx_id) return false;
 
     if (this.modoNovo) {
-      return this.exercicio.nome.trim().length > 0;
+    // só exercício novo é obrigado a ter um gif do WorkoutX vinculado;
+    // exercícios antigos (cadastrados antes da integração) continuam
+    // editáveis mesmo sem um workoutx_id
+      return this.exercicio.nome.trim().length > 0 && !!this.exercicio.workoutx_id;
     }
 
     return this.exercicioEditandoId !== null;

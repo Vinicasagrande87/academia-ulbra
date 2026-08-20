@@ -83,13 +83,15 @@ module.exports = {
 
             const treinos = await query;
 
-            for (const treino of treinos) {
-            // pra cada treino, busca os exercícios com carga, repetição e vídeo
-            // incluindo exercicio_id, que a tela de edição precisa pra pré-selecionar
-            // o exercício certo no <ion-select>
-                treino.exercicios = await connection('treino_itens')
+            if (treinos.length > 0) {
+            // busca os itens de todos os treinos numa query só (evita N+1:
+            // uma query por treino ficava lento com muitos treinos)
+                const treinoIds = treinos.map(treino => treino.id);
+
+                const itens = await connection('treino_itens')
                     .join('exercicios', 'exercicios.id', '=', 'treino_itens.exercicio_id')
                     .select(
+                        'treino_itens.treino_id',
                         'treino_itens.exercicio_id',
                         'exercicios.nome as exercicio_nome',
                         'exercicios.video_url',
@@ -99,8 +101,14 @@ module.exports = {
                         'treino_itens.repeticoes',
                         'treino_itens.ordem'
                     )
-                    .where('treino_itens.treino_id', treino.id)
+                    .whereIn('treino_itens.treino_id', treinoIds)
                     .orderBy('treino_itens.ordem');
+
+                for (const treino of treinos) {
+                    treino.exercicios = itens
+                        .filter(item => item.treino_id === treino.id)
+                        .map(({ treino_id, ...resto }) => resto);
+                }
             }
 
             return res.json(treinos);
