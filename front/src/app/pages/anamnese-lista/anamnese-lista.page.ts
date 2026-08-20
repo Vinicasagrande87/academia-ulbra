@@ -5,7 +5,7 @@ import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { medkitOutline } from 'ionicons/icons';
+import { medkitOutline, searchOutline, searchSharp, closeCircle, closeSharp } from 'ionicons/icons';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth';
 
@@ -28,7 +28,13 @@ export class AnamneseListaPage implements OnInit {
     private http: HttpClient,
     private authService: AuthService
   ) {
-    addIcons({ 'medkit-outline': medkitOutline });
+    addIcons({
+      'medkit-outline': medkitOutline,
+      'search-outline': searchOutline,
+      'search-sharp': searchSharp,
+      'close-circle': closeCircle,
+      'close-sharp': closeSharp
+    });
   }
 
   ngOnInit() {

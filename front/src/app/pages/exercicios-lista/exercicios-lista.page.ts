@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { searchOutline, searchSharp, closeCircle, closeSharp } from 'ionicons/icons';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
@@ -35,7 +37,14 @@ export class ExerciciosListaPage implements OnInit {
     private http: HttpClient,
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) {
+    addIcons({
+      'search-outline': searchOutline,
+      'search-sharp': searchSharp,
+      'close-circle': closeCircle,
+      'close-sharp': closeSharp
+    });
+  }
 
   ngOnInit() {
     this.carregarExercicios();

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { searchOutline, searchSharp, closeCircle, closeSharp } from 'ionicons/icons';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { AuthService } from '../../services/auth';
@@ -38,7 +40,14 @@ export class AlunosListaPage implements OnInit {
     private authService: AuthService,
     private alertController: AlertController,
     private toastController: ToastController
-  ) {}
+  ) {
+    addIcons({
+      'search-outline': searchOutline,
+      'search-sharp': searchSharp,
+      'close-circle': closeCircle,
+      'close-sharp': closeSharp
+    });
+  }
 
   ngOnInit() {
     this.carregarAlunos();
