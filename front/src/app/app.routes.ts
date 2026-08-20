@@ -54,6 +54,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/aluno-perfil/aluno-perfil.page').then( m => m.AlunoPerfilPage)
   },
   {
+    path: 'aluno-anamnese/:alunoId',
+    canActivate: [authGuard],
+    data: { roles: ['admin', 'professor'] },
+    loadComponent: () => import('./pages/aluno-anamnese/aluno-anamnese.page').then( m => m.AlunoAnamnesePage)
+  },
+  {
     path: 'treino-cadastro/:alunoId',
     canActivate: [authGuard],
     data: { roles: ['admin', 'professor'] },

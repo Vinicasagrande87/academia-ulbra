@@ -1,0 +1,165 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="'/aluno-ficha/' + alunoId"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Anamnese{{ nomeAluno ? ' - ' + nomeAluno : '' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="carregando" class="ion-text-center ion-padding">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <form *ngIf="!carregando" (ngSubmit)="salvar()">
+
+    <h2>Grupo II - Atividade Física</h2>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Pratica alguma atividade desportiva atualmente?</ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.pratica_atividade_atualmente" name="pratica_atividade_atualmente">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+    <ion-item *ngIf="anamnese.pratica_atividade_atualmente === 'sim'">
+      <ion-input
+        label="Qual/Quais?"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.pratica_atividade_atualmente_qual"
+        name="pratica_atividade_atualmente_qual">
+      </ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Praticou alguma atividade física/desporto anteriormente?</ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.praticou_atividade_anteriormente" name="praticou_atividade_anteriormente">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+    <ion-item *ngIf="anamnese.praticou_atividade_anteriormente === 'sim'">
+      <ion-input
+        label="Qual/Quais?"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.praticou_atividade_anteriormente_qual"
+        name="praticou_atividade_anteriormente_qual">
+      </ion-input>
+    </ion-item>
+
+    <h2 class="ion-margin-top">Grupo III - Avaliação Diagnóstica de Doenças</h2>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">
+        Teve ou tem problemas osteoarticulares?
+        <p>(ex.: fraturas, lordoses, hérnias)</p>
+      </ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.problema_osteoarticular" name="problema_osteoarticular">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+    <ion-item *ngIf="anamnese.problema_osteoarticular === 'sim'">
+      <ion-input
+        label="Qual/Quais?"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.problema_osteoarticular_qual"
+        name="problema_osteoarticular_qual">
+      </ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">
+        Teve ou tem problemas neuromusculares?
+        <p>(ex.: entorses, edemas, ruturas de ligamentos, micro/macro ruturas)</p>
+      </ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.problema_neuromuscular" name="problema_neuromuscular">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+    <ion-item *ngIf="anamnese.problema_neuromuscular === 'sim'">
+      <ion-input
+        label="Qual/Quais?"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.problema_neuromuscular_qual"
+        name="problema_neuromuscular_qual">
+      </ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Sofre de problemas coronários? Risco familiar?</ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.problema_coronario" name="problema_coronario">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+    <ion-item *ngIf="anamnese.problema_coronario === 'sim'">
+      <ion-input
+        label="Qual/Quais?"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.problema_coronario_qual"
+        name="problema_coronario_qual">
+      </ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Sofre de problemas vasculares?</ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.problema_vascular" name="problema_vascular">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Foi hospitalizado nos últimos cinco anos?</ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.hospitalizado_5_anos" name="hospitalizado_5_anos">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-label class="ion-text-wrap">Fez alguma cirurgia nos últimos cinco anos?</ion-label>
+    </ion-item>
+    <ion-segment [(ngModel)]="anamnese.cirurgia_5_anos" name="cirurgia_5_anos">
+      <ion-segment-button value="sim">Sim</ion-segment-button>
+      <ion-segment-button value="nao">Não</ion-segment-button>
+    </ion-segment>
+
+    <h2 class="ion-margin-top">Contato de Emergência</h2>
+
+    <ion-item>
+      <ion-input
+        label="Nome"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.contato_emergencia_nome"
+        name="contato_emergencia_nome"
+        placeholder="Ex: Maria Silva">
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input
+        label="Telefone"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.contato_emergencia_telefone"
+        name="contato_emergencia_telefone"
+        placeholder="Ex: (51) 99999-9999">
+      </ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input
+        label="Grau de parentesco"
+        labelPlacement="stacked"
+        [(ngModel)]="anamnese.contato_emergencia_parentesco"
+        name="contato_emergencia_parentesco"
+        placeholder="Ex: Mãe, Pai, Cônjuge...">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="salvando">
+      {{ salvando ? 'Salvando...' : 'SALVAR ANAMNESE' }}
+    </ion-button>
+  </form>
+</ion-content>

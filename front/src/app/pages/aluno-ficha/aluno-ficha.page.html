@@ -15,6 +15,20 @@
     </ion-card-content>
   </ion-card>
 
+  <ion-card
+    [routerLink]="['/aluno-anamnese', alunoId]"
+    [state]="{ nome: nomeAluno }"
+    button
+    class="card-anamnese">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="medkit-outline"></ion-icon>
+        Anamnese
+      </ion-card-title>
+      <ion-card-subtitle>Ficha de saúde e contato de emergência (visível só para professor/admin)</ion-card-subtitle>
+    </ion-card-header>
+  </ion-card>
+
   <ion-button
     expand="block"
     [routerLink]="['/treino-cadastro', alunoId]"
