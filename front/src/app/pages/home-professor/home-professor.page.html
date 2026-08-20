@@ -12,7 +12,8 @@
 
 <ion-content class="ion-padding">
   <div class="welcome-banner">
-    <h2>Bem-vindo, Gestor!</h2>
+    <h2 *ngIf="isAdmin">Bem-vindo, Gestor!</h2>
+    <h2 *ngIf="!isAdmin">Bem-vindo, Prof. {{ nomeUsuario }}!</h2>
     <p>Selecione abaixo a opção desejada para gerenciar a academia.</p>
   </div>
 

@@ -13,6 +13,7 @@ import {
 } from 'ionicons/icons';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
+import { AuthService } from '../../services/auth';
 import { calcularSituacaoPlano } from '../aluno-financeiro/aluno-financeiro.page';
 // reaproveita a mesma lógica de cálculo usada na tela financeira do aluno
 
@@ -26,10 +27,12 @@ import { calcularSituacaoPlano } from '../aluno-financeiro/aluno-financeiro.page
 export class HomeAlunoPage implements OnInit {
 
   avisoPlano: { mensagem: string, cor: string } | null = null;
+  nomeAluno: string = '';
 
   constructor(
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {
     addIcons({
       'log-out-outline': logOutOutline,
@@ -40,6 +43,7 @@ export class HomeAlunoPage implements OnInit {
   }
 
   ngOnInit() {
+    this.nomeAluno = this.authService.getUser()?.nome || '';
     this.verificarSituacaoPlano();
   }
 

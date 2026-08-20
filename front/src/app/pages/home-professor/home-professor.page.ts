@@ -28,6 +28,7 @@ export class HomeProfessorPage implements OnInit {
   isAdmin = false;
   // controla a seção extra de cards (cadastrar/editar professor, gerenciar
   // planos) que só o admin deve ver — professor mantém só o que já tinha
+  nomeUsuario = '';
 
   constructor(
     private router: Router,
@@ -59,6 +60,7 @@ export class HomeProfessorPage implements OnInit {
   private atualizarTipoUsuario() {
     const usuario = this.authService.getUser();
     this.isAdmin = usuario?.tipo === 'admin';
+    this.nomeUsuario = usuario?.nome || '';
   }
 
   logout() {
