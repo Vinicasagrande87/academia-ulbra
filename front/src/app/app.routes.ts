@@ -60,6 +60,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/aluno-anamnese/aluno-anamnese.page').then( m => m.AlunoAnamnesePage)
   },
   {
+    path: 'anamnese-lista',
+    canActivate: [authGuard],
+    data: { roles: ['admin', 'professor'] },
+    loadComponent: () => import('./pages/anamnese-lista/anamnese-lista.page').then( m => m.AnamneseListaPage)
+  },
+  {
     path: 'treino-cadastro/:alunoId',
     canActivate: [authGuard],
     data: { roles: ['admin', 'professor'] },

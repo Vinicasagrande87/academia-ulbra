@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="voltarPara"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Anamnese</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      [(ngModel)]="filtro"
+      placeholder="Buscar aluno pelo nome"
+      debounce="300"
+      showClearButton="always">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <p class="ion-padding-horizontal">Selecione um aluno para ver ou preencher a ficha de anamnese.</p>
+
+  <ion-list *ngIf="alunosFiltrados().length > 0; else semAlunos">
+    <ion-item *ngFor="let aluno of alunosFiltrados()" [routerLink]="['/aluno-anamnese', aluno.id]" [state]="{ nome: aluno.nome }" button detail="true">
+      <ion-icon name="medkit-outline" slot="start" color="danger"></ion-icon>
+      <ion-label>
+        <h2>{{ aluno.nome }}</h2>
+        <p>{{ aluno.email }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semAlunos>
+    <div class="ion-text-center ion-padding">
+      <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado ainda.</p>
+      <p *ngIf="alunos.length > 0">Nenhum aluno encontrado com esse nome.</p>
+    </div>
+  </ng-template>
+</ion-content>
