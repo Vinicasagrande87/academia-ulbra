@@ -66,7 +66,10 @@ module.exports = {
             const buffer = Buffer.from(await resposta.arrayBuffer());
 
             res.set('Content-Type', 'image/gif');
-            res.set('Cache-Control', 'public, max-age=604800');
+            res.set('Cache-Control', 'public, max-age=86400');
+            // 24 horas (86400 segundos) — respeita o limite de cache de curto
+            // prazo dos termos de uso do WorkoutX (máx. 24h); nunca guarda
+            // permanente, sempre busca de novo no dia seguinte
             res.set('Cross-Origin-Resource-Policy', 'cross-origin');
             // o helmet() no server.js bloqueia por padrão imagens carregadas de
             // um domínio diferente (front e back são domínios separados no
