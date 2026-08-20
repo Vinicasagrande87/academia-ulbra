@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { medkitOutline } from 'ionicons/icons';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth';
 
@@ -25,7 +27,9 @@ export class AnamneseListaPage implements OnInit {
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) {
+    addIcons({ 'medkit-outline': medkitOutline });
+  }
 
   ngOnInit() {
     this.carregarAlunos();

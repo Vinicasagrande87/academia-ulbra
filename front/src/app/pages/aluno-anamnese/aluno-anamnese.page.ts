@@ -7,10 +7,9 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 
-// campos de resposta Sim/Não do formulário; guardados como 'sim' | 'nao' | ''
-// no front (pra usar em ion-segment) e convertidos pra boolean/null só na
-// hora de mandar/receber da API, que guarda tudo como boolean no banco
-const CAMPOS_SIM_NAO = [
+// todos os campos são texto livre; a lista abaixo é usada só pra validar
+// que nada ficou em branco antes de liberar o botão de salvar
+const CAMPOS_OBRIGATORIOS = [
   'pratica_atividade_atualmente',
   'praticou_atividade_anteriormente',
   'problema_osteoarticular',
@@ -18,7 +17,10 @@ const CAMPOS_SIM_NAO = [
   'problema_coronario',
   'problema_vascular',
   'hospitalizado_5_anos',
-  'cirurgia_5_anos'
+  'cirurgia_5_anos',
+  'contato_emergencia_nome',
+  'contato_emergencia_telefone',
+  'contato_emergencia_parentesco'
 ] as const;
 
 @Component({
@@ -37,15 +39,10 @@ export class AlunoAnamnesePage implements OnInit {
 
   anamnese: any = {
     pratica_atividade_atualmente: '',
-    pratica_atividade_atualmente_qual: '',
     praticou_atividade_anteriormente: '',
-    praticou_atividade_anteriormente_qual: '',
     problema_osteoarticular: '',
-    problema_osteoarticular_qual: '',
     problema_neuromuscular: '',
-    problema_neuromuscular_qual: '',
     problema_coronario: '',
-    problema_coronario_qual: '',
     problema_vascular: '',
     hospitalizado_5_anos: '',
     cirurgia_5_anos: '',
@@ -72,17 +69,9 @@ export class AlunoAnamnesePage implements OnInit {
     this.http.get(`${environment.apiUrl}/anamnese/${this.alunoId}`).subscribe({
       next: (res: any) => {
         if (res) {
-          for (const campo of CAMPOS_SIM_NAO) {
-            this.anamnese[campo] = res[campo] === true ? 'sim' : res[campo] === false ? 'nao' : '';
+          for (const campo of CAMPOS_OBRIGATORIOS) {
+            this.anamnese[campo] = res[campo] || '';
           }
-          this.anamnese.pratica_atividade_atualmente_qual = res.pratica_atividade_atualmente_qual || '';
-          this.anamnese.praticou_atividade_anteriormente_qual = res.praticou_atividade_anteriormente_qual || '';
-          this.anamnese.problema_osteoarticular_qual = res.problema_osteoarticular_qual || '';
-          this.anamnese.problema_neuromuscular_qual = res.problema_neuromuscular_qual || '';
-          this.anamnese.problema_coronario_qual = res.problema_coronario_qual || '';
-          this.anamnese.contato_emergencia_nome = res.contato_emergencia_nome || '';
-          this.anamnese.contato_emergencia_telefone = res.contato_emergencia_telefone || '';
-          this.anamnese.contato_emergencia_parentesco = res.contato_emergencia_parentesco || '';
         }
         this.carregando = false;
       },
@@ -93,16 +82,18 @@ export class AlunoAnamnesePage implements OnInit {
     });
   }
 
-  salvar() {
-    const payload: any = { ...this.anamnese };
+  podeSalvar(): boolean {
+    return CAMPOS_OBRIGATORIOS.every(campo => !!String(this.anamnese[campo] ?? '').trim());
+  }
 
-    for (const campo of CAMPOS_SIM_NAO) {
-      payload[campo] = this.anamnese[campo] === 'sim' ? true : this.anamnese[campo] === 'nao' ? false : null;
+  salvar() {
+    if (!this.podeSalvar()) {
+      return;
     }
 
     this.salvando = true;
 
-    this.http.put(`${environment.apiUrl}/anamnese/${this.alunoId}`, payload).subscribe({
+    this.http.put(`${environment.apiUrl}/anamnese/${this.alunoId}`, this.anamnese).subscribe({
       next: async () => {
         this.salvando = false;
         const toast = await this.toastController.create({

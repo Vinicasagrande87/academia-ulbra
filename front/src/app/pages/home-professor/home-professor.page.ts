@@ -10,7 +10,8 @@ import {
   peopleOutline,
   fitnessOutline,
   cardOutline,
-  pricetagOutline
+  pricetagOutline,
+  medkitOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth';
 // ajuste o caminho conforme a pasta real onde o auth.ts está no seu projeto
@@ -38,7 +39,8 @@ export class HomeProfessorPage implements OnInit {
       'people-outline': peopleOutline,
       'fitness-outline': fitnessOutline,
       'card-outline': cardOutline,
-      'pricetag-outline': pricetagOutline
+      'pricetag-outline': pricetagOutline,
+      'medkit-outline': medkitOutline
     });
   }
 

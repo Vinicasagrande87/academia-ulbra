@@ -2,15 +2,10 @@ const connection = require('../database/connections');
 
 const CAMPOS_EDITAVEIS = [
     'pratica_atividade_atualmente',
-    'pratica_atividade_atualmente_qual',
     'praticou_atividade_anteriormente',
-    'praticou_atividade_anteriormente_qual',
     'problema_osteoarticular',
-    'problema_osteoarticular_qual',
     'problema_neuromuscular',
-    'problema_neuromuscular_qual',
     'problema_coronario',
-    'problema_coronario_qual',
     'problema_vascular',
     'hospitalizado_5_anos',
     'cirurgia_5_anos',
