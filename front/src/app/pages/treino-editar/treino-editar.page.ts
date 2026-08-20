@@ -111,8 +111,8 @@ export class TreinoEditarPage implements OnInit {
     return this.itens.every(item =>
       !!item.grupo &&
       !!item.exercicio_id &&
-      !!item.carga?.trim() &&
-      !!item.repeticoes?.trim()
+      !!String(item.carga ?? '').trim() &&
+      !!String(item.repeticoes ?? '').trim()
     );
   }
 
