@@ -93,6 +93,7 @@ module.exports = {
                         'treino_itens.exercicio_id',
                         'exercicios.nome as exercicio_nome',
                         'exercicios.video_url',
+                        'exercicios.workoutx_id',
                         'exercicios.equipamento',
                         'treino_itens.carga',
                         'treino_itens.repeticoes',

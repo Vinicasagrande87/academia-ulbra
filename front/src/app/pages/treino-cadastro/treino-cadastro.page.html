@@ -52,10 +52,12 @@
           </ion-select>
         </ion-item>
 
-        <app-youtube-embed
-          *ngIf="videoUrlDoItem(item)"
-          [url]="videoUrlDoItem(item)!">
-        </app-youtube-embed>
+        <!-- gif/vídeo puxado automaticamente do exercício escolhido -->
+        <app-exercicio-midia
+          *ngIf="exercicioCompletoDoItem(item)"
+          [workoutxId]="exercicioCompletoDoItem(item)?.workoutx_id"
+          [videoUrl]="exercicioCompletoDoItem(item)?.video_url">
+        </app-exercicio-midia>
 
         <ion-item>
           <ion-input

@@ -157,8 +157,10 @@ module.exports = {
                 treino.exercicios = await connection('treino_itens')
                     .join('exercicios', 'exercicios.id', '=', 'treino_itens.exercicio_id')
                     .select(
+                        'exercicios.id as exercicio_id',
                         'exercicios.nome as exercicio_nome',
                         'exercicios.video_url',
+                        'exercicios.workoutx_id',
                         'treino_itens.carga',
                         'treino_itens.repeticoes'
                     )

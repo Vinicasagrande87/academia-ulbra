@@ -77,22 +77,49 @@
         Voltar para a lista de exercícios
       </ion-button>
 
-      <ion-item *ngIf="modoNovo || exercicioEditandoId">
-        <ion-input
-          label="Link do Vídeo (YouTube)"
-          labelPlacement="stacked"
-          type="text"
-          [(ngModel)]="exercicio.video_url"
-          name="video_url"
-          required
-          placeholder="Ex: https://www.youtube.com/watch?v=...">
-        </ion-input>
-      </ion-item>
+      <!-- prévia do gif já escolhido (edição ou recém-selecionado na busca) -->
+      <app-exercicio-midia
+        *ngIf="exercicio.workoutx_id"
+        [workoutxId]="exercicio.workoutx_id">
+      </app-exercicio-midia>
 
-      <app-youtube-embed
-        *ngIf="(modoNovo || exercicioEditandoId) && exercicio.video_url"
-        [url]="exercicio.video_url">
-      </app-youtube-embed>
+      <!-- busca no catálogo WorkoutX, disponível tanto pra criar quanto pra trocar o gif de um existente -->
+      <ng-container *ngIf="isAdmin && (modoNovo || exercicioEditandoId)">
+        <ion-item>
+          <ion-input
+            label="Buscar animação (ex: supino, agachamento)"
+            labelPlacement="stacked"
+            type="text"
+            [(ngModel)]="termoBusca"
+            name="termoBusca"
+            placeholder="Digite em português">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" fill="outline" type="button" (click)="buscarNoWorkoutX()">
+          {{ buscando ? 'Buscando...' : 'Buscar' }}
+        </ion-button>
+
+        <ion-note *ngIf="jaBuscou && !buscando && resultadosBusca.length === 0" class="ion-padding-start">
+          Nenhuma animação encontrada para esse termo. Tenta descrever de outro jeito.
+        </ion-note>
+
+        <ion-list *ngIf="resultadosBusca.length > 0">
+          <ion-item
+            *ngFor="let resultado of resultadosBusca"
+            button
+            [class.selecionado]="exercicio.workoutx_id === resultado.workoutx_id"
+            (click)="escolherResultado(resultado)">
+            <ion-thumbnail slot="start">
+              <img [src]="apiUrl + '/workoutx/gif/' + resultado.workoutx_id" alt="">
+            </ion-thumbnail>
+            <ion-label>
+              <h3>{{ resultado.nome_original }}</h3>
+              <p>{{ resultado.bodyPart }} • {{ resultado.equipment }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ng-container>
 
       <ion-button
         *ngIf="isAdmin && (modoNovo || exercicioEditandoId)"

@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth';
-import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
+import { ExercicioMidiaComponent } from '../../components/exercicio-midia/exercicio-midia.component';
 
 interface Exercicio {
   id: number;
@@ -14,6 +14,15 @@ interface Exercicio {
   grupo_muscular: string;
   video_url: string;
   equipamento: string;
+  workoutx_id: string | null;
+}
+
+interface ResultadoBuscaWorkoutX {
+  workoutx_id: string;
+  nome_original: string;
+  bodyPart: string;
+  target: string;
+  equipment: string;
 }
 
 @Component({
@@ -21,7 +30,7 @@ interface Exercicio {
   templateUrl: './exercicio-cadastro.page.html',
   styleUrls: ['./exercicio-cadastro.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RouterModule, YoutubeEmbedComponent]
+  imports: [CommonModule, FormsModule, IonicModule, RouterModule, ExercicioMidiaComponent]
 })
 export class ExercicioCadastroPage {
 
@@ -36,11 +45,20 @@ export class ExercicioCadastroPage {
     nome: '',
     grupo_muscular: '',
     video_url: '',
-    equipamento: ''
+    equipamento: '',
+    workoutx_id: null as string | null
   };
+
+  // busca no catálogo WorkoutX
+  termoBusca = '';
+  buscando = false;
+  resultadosBusca: ResultadoBuscaWorkoutX[] = [];
+  jaBuscou = false;
 
   isAdmin = false;
   voltarPara: string = '/home-professor';
+  apiUrl = environment.apiUrl;
+  // exposto pro template poder montar a URL da miniatura do gif
 
   constructor(
     private http: HttpClient,
@@ -65,8 +83,6 @@ export class ExercicioCadastroPage {
     });
   }
 
-  // se veio de "exercicios-lista" com ?grupo=X&exercicioId=Y, já abre
-  // direto no modo de edição desse exercício específico
   private aplicarPreSelecaoDaUrl() {
     const grupo = this.route.snapshot.queryParamMap.get('grupo');
     const exercicioId = this.route.snapshot.queryParamMap.get('exercicioId');
@@ -103,8 +119,10 @@ export class ExercicioCadastroPage {
         nome: ex.nome,
         grupo_muscular: ex.grupo_muscular,
         video_url: ex.video_url || '',
-        equipamento: ex.equipamento || ''
+        equipamento: ex.equipamento || '',
+        workoutx_id: ex.workoutx_id || null
       };
+      this.limparBusca();
     }
   }
 
@@ -114,20 +132,56 @@ export class ExercicioCadastroPage {
       nome: '',
       grupo_muscular: this.grupoSelecionado,
       video_url: '',
-      equipamento: ''
+      equipamento: '',
+      workoutx_id: null
     };
+    this.limparBusca();
+  }
+
+  limparBusca() {
+    this.termoBusca = '';
+    this.resultadosBusca = [];
+    this.jaBuscou = false;
+  }
+
+  buscarNoWorkoutX() {
+    if (!this.termoBusca.trim()) return;
+
+    this.buscando = true;
+    this.jaBuscou = true;
+
+    this.http.get<{ termo_traduzido: string, resultados: ResultadoBuscaWorkoutX[] }>(
+      `${environment.apiUrl}/workoutx/search`,
+      { params: { name: this.termoBusca.trim() } }
+    ).subscribe({
+      next: (res) => {
+        this.resultadosBusca = res.resultados;
+        this.buscando = false;
+      },
+      error: (err) => {
+        console.error('Erro ao buscar no WorkoutX:', err);
+        this.resultadosBusca = [];
+        this.buscando = false;
+      }
+    });
+  }
+
+  escolherResultado(resultado: ResultadoBuscaWorkoutX) {
+    this.exercicio.workoutx_id = resultado.workoutx_id;
+    if (this.modoNovo && !this.exercicio.nome.trim()) {
+      this.exercicio.nome = resultado.nome_original;
+    }
   }
 
   podeSalvar(): boolean {
     if (!this.grupoSelecionado) return false;
-    const videoOk = this.exercicio.video_url.trim().length > 0;
+    if (!this.exercicio.workoutx_id) return false;
 
     if (this.modoNovo) {
-      const nomeOk = this.exercicio.nome.trim().length > 0;
-      return nomeOk && videoOk;
+      return this.exercicio.nome.trim().length > 0;
     }
 
-    return this.exercicioEditandoId !== null && videoOk;
+    return this.exercicioEditandoId !== null;
   }
 
   salvar() {

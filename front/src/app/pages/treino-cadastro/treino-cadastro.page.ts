@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
-import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-embed.component';
+import { ExercicioMidiaComponent } from '../../components/exercicio-midia/exercicio-midia.component';
 // ajuste o caminho conforme onde o componente ficou salvo
 
 @Component({
@@ -14,7 +14,7 @@ import { YoutubeEmbedComponent } from '../../components/youtube-embed/youtube-em
   templateUrl: './treino-cadastro.page.html',
   styleUrls: ['./treino-cadastro.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RouterModule, YoutubeEmbedComponent]
+  imports: [CommonModule, FormsModule, IonicModule, RouterModule, ExercicioMidiaComponent]
 })
 export class TreinoCadastroPage {
 
@@ -54,10 +54,12 @@ export class TreinoCadastroPage {
     return this.exercicios.filter(ex => ex.grupo_muscular === grupo);
   }
 
-  videoUrlDoItem(item: { exercicio_id: number | null }): string | null {
+  // busca o exercício completo já cadastrado (com video_url e workoutx_id)
+  // do item escolhido nesse card — não precisa o professor colar/escolher
+  // nada além do nome, vem tudo junto automaticamente
+  exercicioCompletoDoItem(item: { exercicio_id: number | null }) {
     if (!item.exercicio_id) return null;
-    const ex = this.exercicios.find(e => e.id === item.exercicio_id);
-    return ex?.video_url || null;
+    return this.exercicios.find(ex => ex.id === item.exercicio_id) || null;
   }
 
   adicionarItem() {
@@ -68,8 +70,6 @@ export class TreinoCadastroPage {
     this.itens.splice(index, 1);
   }
 
-  // checagem manual — cada exercício da lista precisa estar completo
-  // (grupo, exercício, carga e repetições), além do dia da semana escolhido
   podeSalvar(): boolean {
     if (!this.diaSemana) return false;
     if (this.itens.length === 0) return false;
@@ -84,7 +84,7 @@ export class TreinoCadastroPage {
 
   salvarTreino() {
     if (!this.podeSalvar()) {
-      return; // trava extra, além do [disabled] do botão
+      return;
     }
 
     const treino = {
