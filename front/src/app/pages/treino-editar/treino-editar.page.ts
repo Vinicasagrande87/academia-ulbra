@@ -145,7 +145,9 @@ export class TreinoEditarPage implements OnInit {
       dia_semana: this.dia,
       exercicios: this.itens.map((item, i) => ({
         exercicio_id: item.exercicio_id,
-        carga: item.carga ? parseInt(String(item.carga).replace(/\D/g, ''), 10) : null,
+        carga: item.carga !== null && item.carga !== undefined && String(item.carga).trim() !== ''
+          ? parseInt(String(item.carga).replace(/\D/g, ''), 10)
+          : null,
         repeticoes: item.repeticoes,
         ordem: i + 1
       }))

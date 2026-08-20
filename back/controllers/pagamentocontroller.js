@@ -42,7 +42,7 @@ module.exports = {
                 // diferente do fluxo do aluno, que sempre usa o valor do plano
                 const { aluno_id, plano_id, valor, forma_pagamento, data_pagamento, observacao } = req.body;
 
-                if (!aluno_id || valor === undefined || valor === null || isNaN(Number(valor))) {
+                if (!aluno_id || valor === undefined || valor === null || isNaN(Number(valor)) || Number(valor) <= 0) {
                     return res.status(400).json({ error: 'Informe o aluno e um valor válido para o pagamento.' });
                 }
 

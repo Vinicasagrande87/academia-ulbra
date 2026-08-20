@@ -22,7 +22,11 @@ module.exports = {
             const alunoComPlanoAtivo = await connection('pagamentos')
                 .where('aluno_id', aluno_id)
                 .andWhere('status', 'confirmado')
-                .andWhere('valido_ate', '>=', new Date())
+                .andWhere('valido_ate', '>=', dataDeHoje())
+                // compara com a data (sem hora) de hoje: valido_ate é uma
+                // coluna "date"; comparar com um Date/timestamp completo faz
+                // o Postgres tratar valido_ate como meia-noite e a trava
+                // passava a falhar a partir de qualquer horário depois das 00h
                 .first();
             // trava: só deixa montar treino novo se o aluno tiver um pagamento
             // confirmado cuja validade ainda não passou. Isso não afeta a edição
@@ -190,3 +194,13 @@ module.exports = {
         }
     }
 };
+
+function dataDeHoje() {
+// formata a data local de hoje como 'YYYY-MM-DD', pra comparar com uma
+// coluna "date" do Postgres sem o descompasso de horário de um timestamp
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+}

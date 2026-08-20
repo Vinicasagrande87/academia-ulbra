@@ -44,6 +44,9 @@ export class ExerciciosListaPage implements OnInit {
   ionViewWillEnter() {
     const usuario = this.authService.getUser();
     this.isAdmin = usuario?.tipo === 'admin';
+    // professor não tem acesso a /exercicio-cadastro (rota restrita a admin),
+    // então o botão de voltar precisa apontar pra home de cada papel
+    this.voltarPara = this.isAdmin ? '/exercicio-cadastro' : '/home-professor';
     this.carregarExercicios();
   }
 
