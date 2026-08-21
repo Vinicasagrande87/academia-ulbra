@@ -1,59 +1,112 @@
-# Sistema de Gestão para Academia - FitControl IA
+# Ulbra Gym
 
-Repositório destinado ao desenvolvimento do projeto prático da disciplina de Fundamentos de Inteligência Artificial (FIA). O objetivo deste primeiro incremento é registrar a definição inicial do problema, o escopo, o público-alvo, as fontes de dados e o planejamento ágil (backlog) de um sistema inteligente para gestão de academias.
+Sistema completo de gestão para academias: cadastro de alunos, montagem de treinos com demonstração em vídeo, controle financeiro de planos e pagamentos, e ficha de anamnese. Multi-papel (aluno, professor, administrador), com aplicativo mobile via Capacitor.
 
----
+## Funcionalidades
 
-## 1. Domínio Inicial Escolhido
-**Gestão de Academias e Educação Física**, com foco no controle de alunos, planos de treino personalizados, gestão de acessos e utilização de algoritmos preditivos para engajamento e prevenção de evasão (*churn*).
+**Aluno**
+- Login e área própria com resumo de treinos e situação financeira
+- Visualização dos treinos da semana, com carga, repetições e demonstração em vídeo de cada exercício
+- Acompanhamento do próprio plano (ativo, vencendo ou vencido)
 
----
+**Professor**
+- Cadastro e gestão de alunos
+- Montagem e edição de treinos por dia da semana, com exercícios do catálogo
+- Vínculo de plano e registro de pagamentos
+- Preenchimento da ficha de anamnese (saúde e contato de emergência) — visível apenas para professor/admin, nunca para o aluno
 
-## 2. Descrição do Problema
-Gerenciar uma academia envolve o controle constante de mensalidades, frequência de alunos, renovações de planos, lotação de horários de pico e a montagem de fichas de treino individualizadas. Um dos maiores desafios dos gestores é a alta taxa de desistência (evasão de alunos) e a dificuldade dos instrutores em acompanhar de forma próxima a evolução de cada aluno para propor ajustes nos treinos. 
+**Administrador**
+- Tudo que o professor tem acesso, mais:
+- Cadastro e gestão de professores
+- Cadastro do catálogo de exercícios, com busca e vínculo automático de gif demonstrativo via [WorkoutX API](https://workoutxapp.com/)
+- Gestão de planos (criação, edição, remoção)
 
-O projeto visa desenvolver um sistema que centralize a operação da academia e utilize técnicas de Inteligência Artificial para identificar padrões de abandono, prever a necessidade de renovação de planos e auxiliar na recomendação automatizada de variações de exercícios com base no perfil e objetivo do aluno.
+## Tecnologias
 
----
+**Frontend** (`front/`)
+- [Angular 20](https://angular.dev/) (standalone components) + [Ionic 8](https://ionicframework.com/)
+- [Capacitor 8](https://capacitorjs.com/) — build para Android/iOS a partir do mesmo código
+- Deploy: [Vercel](https://vercel.com/)
 
-## 3. Público ou Contexto de Aplicação
-* **Gestores e Administradores de Academias:** Que precisam otimizar o fluxo financeiro, controlar o acesso à catraca e monitorar a retenção de clientes.
-* **Professores e Personal Trainers:** Que buscam agilidade na criação e acompanhamento de rotinas de treino adaptadas às limitações e objetivos dos praticantes.
-* **Alunos da Academia:** Que utilizam a plataforma para consultar seus treinos, histórico de frequência e evolução de cargas.
-* **Contexto de Aplicação:** Aplicável a academias de médio porte, estúdios de musculação, CrossFit ou centros de treinamento funcional.
+**Backend** (`back/`)
+- [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/)
+- [Knex.js](https://knexjs.org/) + PostgreSQL (hospedado no [Supabase](https://supabase.com/))
+- Autenticação via [JWT](https://jwt.io/) + senhas com [bcrypt](https://www.npmjs.com/package/bcryptjs)
+- [Helmet](https://helmetjs.github.io/) (headers de segurança) e [express-rate-limit](https://www.npmjs.com/package/express-rate-limit) (proteção contra força bruta no login)
+- Deploy: Vercel (serverless functions)
 
----
+## Estrutura do projeto
 
-## 4. Justificativa: Por que este problema pode ser tratado com IA?
-O problema é ideal para a aplicação de IA devido aos seguintes fatores:
-* **Análise Preditiva de Evasão (*Churn Prediction*):** Algoritmos de Machine Learning (como árvores de decisão ou regressão logística) podem analisar o histórico de frequência, dias da semana que o aluno frequenta e tempo de plano para prever quais clientes possuem alto risco de cancelar a matrícula, permitindo ações proativas da recepção.
-* **Sistemas de Recomendação:** Uso de lógica baseada em regras ou aprendizado de máquina para sugerir progressão de carga ou exercícios substitutos com base no histórico de desempenho e restrições físicas do aluno.
-* **Agrupamento (*Clustering*):** Segmentação de alunos por objetivos e comportamento de treino para campanhas de marketing direcionadas ou programas de incentivo.
+```
+academia ulbra/
+├── back/                   # API REST (Node/Express)
+│   ├── controllers/        # regras de negócio por recurso
+│   ├── middlewares/        # autenticação (JWT) e validação de entrada
+│   ├── database/
+│   │   └── migrations/     # versionamento do schema (Knex)
+│   ├── seeds/               # dados iniciais (admin, exercícios)
+│   ├── routes.js
+│   └── server.js
+└── front/                  # App Ionic/Angular
+    └── src/app/
+        ├── pages/           # uma pasta por tela
+        └── services/        # autenticação, interceptor HTTP
+```
 
----
+## Como rodar localmente
 
+Pré-requisitos: Node.js 20+, uma instância PostgreSQL (ex: um projeto gratuito no [Supabase](https://supabase.com/)) e uma chave de API do [WorkoutX](https://workoutxapp.com/) (opcional — só necessária pra buscar/vincular gifs de exercícios).
 
+### Backend
 
+```bash
+cd back
+npm install
+cp .env.example .env   # preencha com suas credenciais (veja abaixo)
+npx knex migrate:latest
+npx knex seed:run       # cria o admin inicial e alguns exercícios de exemplo
+node server.js
+```
 
-## 5. Registro de Possíveis Fontes de Dados
-Para alimentar e testar o sistema, serão utilizadas as seguintes fontes de dados (dados simulados ou anonimizados para conformidade com a LGPD):
-1. **Base de Dados Relacional Própria (MySQL):** Tabelas estruturadas contendo cadastros de clientes, planos ativos, registros de acesso à catraca (logs de frequência) e histórico de pagamentos.
-2. **Dados de Treinamento e Exercícios:** Repositório interno com catálogo de exercícios, grupos musculares, equipamentos necessários e níveis de dificuldade.
-3. **Métricas de Desempenho:** Registros simulados de avaliações físicas (peso, percentual de gordura, circunferências) e cargas utilizadas nos aparelhos ao longo do tempo.
+Variáveis de ambiente (`back/.env`):
 
----
+| Variável | Descrição |
+| --- | --- |
+| `PORT` | Porta do servidor local (padrão: 3000) |
+| `DATABASE_URL` | String de conexão do PostgreSQL |
+| `APP_SECRET` | Chave secreta usada pra assinar os tokens JWT — gere uma string aleatória grande |
+| `FRONT_URL` | URL(s) do front autorizadas no CORS, separadas por vírgula |
+| `EMAIL_USER` / `EMAIL_PASS` | Credenciais do serviço de e-mail (envio de senha no cadastro do aluno) |
+| `WORKOUTX_API_KEY` | Chave da API do WorkoutX, usada pra buscar/exibir gifs de exercícios |
 
-## 6. Primeira Versão do Backlog do Projeto (Product Backlog)
+### Frontend
 
-| ID | Épico / Funcionalidade | Descrição Resumida | Prioridade |
-| :--- | :--- | :--- | :--- |
-| **US01** | Configuração do Ambiente | Estruturação inicial do repositório Git, configuração do README e definição da arquitetura base. | Alta |
-| **US02** | Gestão de Alunos e Planos | CRUD de clientes, controle de matrículas, tipos de planos e status de pagamento. | Alta |
-| **US03** | Controle de Acessos e Frequência | Registro de check-in / entrada na academia e monitoramento de dias ausentes. | Alta |
-| **US04** | Módulo de Treinos | Cadastro de exercícios, montagem de fichas de treino personalizadas por professor e visualização pelo aluno. | Média |
-| **US05** | Módulo de IA Preditiva (Churn) | Implementação de modelo preditivo para identificar alunos com risco de evasão com base na queda de frequência. | Baixa / Futura |
+```bash
+cd front
+npm install
+npm start   # abre em http://localhost:8100
+```
 
----
+Ajuste a URL da API em `front/src/environments/environment.ts` (desenvolvimento) e `environment.prod.ts` (produção).
 
-## 7. Declaração de Uso de IA Generativa
-Declara-se que ferramentas de Inteligência Artificial Generativa foram utilizadas como suporte de apoio e estruturação de texto para a formulação deste documento de escopo, revisão conceitual da aplicabilidade de IA no domínio de gestão de academias e formatação do backlog inicial, sob supervisão e validação direta do autor do projeto.
+### Gerando o app mobile
+
+```bash
+cd front
+npm run build
+npx cap sync
+npx cap open android   # ou: npx cap open ios
+```
+
+## Segurança
+
+- Autenticação por token JWT (expira em 7 dias) com papéis (`aluno`, `professor`, `admin`) checados em cada endpoint
+- Senhas nunca armazenadas em texto puro (bcrypt)
+- Rotas do frontend protegidas por guard de autenticação e de papel — usuário não autorizado é redirecionado antes de a página carregar
+- Rate limiting no login (10 tentativas / 15 min) contra força bruta
+- Dados de anamnese (saúde) restritos a professor/admin — o próprio aluno não tem acesso a essa informação
+- Chave da API do WorkoutX nunca é exposta ao navegador (o backend atua como proxy)
+
+## Licença
+
+Projeto proprietário — todos os direitos reservados.
