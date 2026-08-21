@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import {
+  IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonSearchbar,
+  IonContent, IonList, IonItem, IonLabel, IonButton
+} from '@ionic/angular/standalone';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -24,7 +27,11 @@ interface Exercicio {
   templateUrl: './exercicios-lista.page.html',
   styleUrls: ['./exercicios-lista.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RouterModule]
+  imports: [
+    CommonModule, FormsModule, RouterModule,
+    IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonSearchbar,
+    IonContent, IonList, IonItem, IonLabel, IonButton
+  ]
 })
 export class ExerciciosListaPage implements OnInit {
 

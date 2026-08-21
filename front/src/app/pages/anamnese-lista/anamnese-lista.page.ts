@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import {
+  IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonSearchbar,
+  IonContent, IonList, IonItem, IonLabel, IonIcon
+} from '@ionic/angular/standalone';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -14,7 +17,11 @@ import { AuthService } from '../../services/auth';
   templateUrl: './anamnese-lista.page.html',
   styleUrls: ['./anamnese-lista.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RouterModule]
+  imports: [
+    CommonModule, FormsModule, RouterModule,
+    IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonSearchbar,
+    IonContent, IonList, IonItem, IonLabel, IonIcon
+  ]
 })
 export class AnamneseListaPage implements OnInit {
   // lista simples de alunos só pra escolher de quem preencher/ver a
