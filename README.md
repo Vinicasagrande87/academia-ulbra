@@ -21,6 +21,18 @@ Sistema completo de gestão para academias: cadastro de alunos, montagem de trei
 - Cadastro do catálogo de exercícios, com busca e vínculo automático de gif demonstrativo via [WorkoutX API](https://workoutxapp.com/)
 - Gestão de planos (criação, edição, remoção)
 
+## Regras de negócio
+
+- **Plano ativo controla o acesso**: um plano é considerado ativo enquanto `valido_ate` (data do pagamento + duração do plano em dias) não passou. Isso trava dois pontos diferentes:
+  - O professor não consegue **montar um treino novo** pra um aluno sem plano ativo (mas continua livre pra **editar** um treino já existente, mesmo com o plano vencido).
+  - O aluno não consegue **ver os treinos já montados** enquanto o plano estiver vencido ou nunca tiver sido confirmado — recebe uma tela orientando a renovar, em vez dos treinos.
+- **Plano sem duração fixa** (`duracao_dias = 0`) é uma opção válida — o pagamento fica com validade igual à própria data de confirmação, tratado à parte de um plano sem duração cadastrada (`null`), que fica sem data de validade.
+- **Valor do pagamento**: quando o próprio aluno solicita um plano, o valor vem sempre do cadastro do plano (não pode ser manipulado pelo aluno); quando é o professor/admin que registra na recepção, o valor pode ser ajustado manualmente (desconto, por exemplo).
+- **Papéis com permissão isolada por endpoint**: aluno, professor e admin são tabelas separadas com IDs independentes — toda rota confere explicitamente o papel de quem está logado antes de agir, pra não confundir registros de tabelas diferentes que coincidentemente têm o mesmo ID.
+- **Anamnese é dado restrito**: fica visível e editável só por professor/admin. O próprio aluno não tem acesso a essa informação em nenhuma tela ou rota da API.
+- **Catálogo de exercícios sem vídeo vinculado** continua editável — um exercício cadastrado antes de ter uma demonstração do WorkoutX associada não fica bloqueado por isso.
+- **Cadastro de aluno** dispara o e-mail com a senha de acesso de forma assíncrona — se o envio falhar, o cadastro em si não é desfeito nem trava a resposta.
+
 ## Tecnologias
 
 **Frontend** (`front/`)
