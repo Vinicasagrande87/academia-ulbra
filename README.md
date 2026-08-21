@@ -91,6 +91,15 @@ Variáveis de ambiente (`back/.env`):
 | `EMAIL_USER` / `EMAIL_PASS` | Credenciais do serviço de e-mail (envio de senha no cadastro do aluno) |
 | `WORKOUTX_API_KEY` | Chave da API do WorkoutX, usada pra buscar/exibir gifs de exercícios |
 
+### Testes automatizados
+
+```bash
+cd back
+npm test
+```
+
+Roda contra um banco **separado** (`TEST_DATABASE_URL` no `.env` — crie um segundo projeto Supabase só pra isso, nunca aponte pro mesmo banco de `DATABASE_URL`). Os testes aplicam as migrations automaticamente nesse banco antes de rodar e cobrem as regras de negócio listadas acima: bloqueio por plano vencido, plano sem duração fixa, valor do pagamento por quem cria, permissão isolada por papel e restrição da anamnese.
+
 ### Frontend
 
 ```bash

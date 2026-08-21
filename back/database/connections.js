@@ -1,9 +1,10 @@
 const knex = require('knex');
 const configuration = require('../knexfile');
 
-// como development e production agora apontam pro mesmo lugar (Supabase),
-// não precisa mais escolher ambiente — sempre usa "development" mesmo,
-// simples como sempre foi
-const connection = knex(configuration.development);
+// development e production apontam pro mesmo Supabase (simples como sempre
+// foi); só quando os testes automatizados rodam (NODE_ENV=test) é que a
+// conexão troca pro banco de teste separado, pra nunca escrever em dado real
+const ambiente = process.env.NODE_ENV === 'test' ? 'test' : 'development';
+const connection = knex(configuration[ambiente]);
 
 module.exports = connection;
