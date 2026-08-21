@@ -12,7 +12,16 @@
     <ion-spinner></ion-spinner>
   </div>
 
-  <div *ngIf="!carregando">
+  <ion-card *ngIf="!carregando && planoInativo" color="danger">
+    <ion-card-content>
+      {{ mensagemPlanoInativo }}
+      <ion-button expand="block" fill="outline" color="light" routerLink="/aluno-financeiro" class="ion-margin-top">
+        Ver situação do plano
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <div *ngIf="!carregando && !planoInativo">
     <ion-list *ngIf="treinos.length > 0; else semTreinos">
       <ion-card *ngFor="let treino of treinos">
         <ion-card-header>

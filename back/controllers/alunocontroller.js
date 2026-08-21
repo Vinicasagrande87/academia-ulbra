@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 // biblioteca pra criptografar a senha do aluno antes de salvar no banco
 const { enviarEmailCadastroAluno } = require('../services/mailer');
 // serviço de envio de e-mail com as credenciais do aluno recém-cadastrado
+const { dataDeHoje } = require('../utils/data');
 
 module.exports = {
 
@@ -153,6 +154,22 @@ module.exports = {
             }
 
             const id = req.userId;
+
+            const planoAtivo = await connection('pagamentos')
+                .where('aluno_id', id)
+                .andWhere('status', 'confirmado')
+                .andWhere('valido_ate', '>=', dataDeHoje())
+                .first();
+            // trava o acesso aos treinos quando o plano venceu (ou nunca foi
+            // confirmado) — o aluno consegue ver a situação financeira, mas
+            // não os treinos, até renovar
+
+            if (!planoAtivo) {
+                return res.status(403).json({
+                    error: 'Seu plano venceu ou ainda não foi confirmado. Procure a recepção para renovar e voltar a acessar seus treinos.',
+                    codigo: 'PLANO_INATIVO'
+                });
+            }
 
             const treinos = await connection('treinos')
                 .where('aluno_id', id)

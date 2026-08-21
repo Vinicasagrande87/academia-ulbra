@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 // ajuste o caminho conforme o nível real da pasta "environments"
 import { ExercicioMidiaComponent } from '../../components/exercicio-midia/exercicio-midia.component';
@@ -12,7 +13,7 @@ import { ExercicioMidiaComponent } from '../../components/exercicio-midia/exerci
   templateUrl: './aluno-treinos.page.html',
   styleUrls: ['./aluno-treinos.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, ExercicioMidiaComponent]
+  imports: [CommonModule, IonicModule, RouterModule, ExercicioMidiaComponent]
 })
 export class AlunoTreinosPage implements OnInit {
 
@@ -20,6 +21,8 @@ export class AlunoTreinosPage implements OnInit {
 
   treinos: any[] = [];
   carregando = true;
+  planoInativo = false;
+  mensagemPlanoInativo = '';
 
   // controla quais exercícios estão com a mídia (gif/vídeo) aberta, pra não
   // carregar tudo de uma vez (pesado se o treino tiver muitos exercícios)
@@ -37,6 +40,8 @@ export class AlunoTreinosPage implements OnInit {
 
   carregarTreinos() {
     this.carregando = true;
+    this.planoInativo = false;
+
     this.http.get(`${environment.apiUrl}/alunos/treino`).subscribe({
       next: (res: any) => {
         this.treinos = res.sort((a: any, b: any) =>
@@ -47,6 +52,13 @@ export class AlunoTreinosPage implements OnInit {
       error: (err) => {
         this.treinos = [];
         this.carregando = false;
+
+        if (err.error?.codigo === 'PLANO_INATIVO') {
+          this.planoInativo = true;
+          this.mensagemPlanoInativo = err.error.error;
+          return;
+        }
+
         if (err.status !== 404) {
           console.error('Erro ao carregar treinos:', err);
         }
